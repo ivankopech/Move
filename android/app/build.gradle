@@ -22,6 +22,8 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def apiKey = project.hasProperty('GOOGLE_API_KEY') ? project.GOOGLE_API_KEY : ""
+
 android {
     namespace "com.example.move_app"
     compileSdkVersion 34
