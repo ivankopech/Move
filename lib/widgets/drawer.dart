@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/location_input.dart';
+import '../screens/map_input.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -20,7 +20,7 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Log In'),
             onTap: () {
               Navigator.of(context)
-                  .pushReplacementNamed(LocationInputScreen.routeName);
+                  .pushReplacementNamed(MapInputScreen.routeName);
             },
           ),
           const Divider(),
