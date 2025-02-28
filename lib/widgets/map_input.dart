@@ -7,20 +7,21 @@ import 'package:geolocator/geolocator.dart';
 import '../widgets/drawer.dart';
 import '../widgets/bottom_sheet.dart';
 
-class LocationInputWidget extends StatefulWidget {
-  const LocationInputWidget({super.key});
+class MapInputWidget extends StatefulWidget {
+  const MapInputWidget({super.key});
 
   @override
-  State<LocationInputWidget> createState() => _LocationInputWidgetState();
+  State<MapInputWidget> createState() => _MapInputWidgetState();
 }
 
-class _LocationInputWidgetState extends State<LocationInputWidget> {
+class _MapInputWidgetState extends State<MapInputWidget> {
   final LatLng center = const LatLng(-32.944242, -60.650538);
   GoogleMapController? mapController;
   LatLng? currentPosition;
   LatLng? selectedPosition;
-  TextEditingController? originAddressController = TextEditingController();
-  TextEditingController? markerAddressController = TextEditingController();
+  TextEditingController originAddressController = TextEditingController();
+  TextEditingController destinationAddressController = TextEditingController();
+  TextEditingController markerAddressController = TextEditingController();
 
   @override
   void initState() {
@@ -73,7 +74,7 @@ class _LocationInputWidgetState extends State<LocationInputWidget> {
         String formattedAddress =
             '${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.postalCode}';
         setState(() {
-          markerAddressController?.text = formattedAddress;
+          markerAddressController.text = formattedAddress;
         });
       }
     } catch (e) {
@@ -133,8 +134,11 @@ class _LocationInputWidgetState extends State<LocationInputWidget> {
                     },
                   ),
                 ),
-                scrollableSheet(
-                    originAddressController!, markerAddressController!),
+                ScrollableSheet(
+                  originAddressController: originAddressController,
+                  destinationAddressController: destinationAddressController,
+                  locController: markerAddressController,
+                ),
               ],
             ),
     );
