@@ -54,7 +54,7 @@ class _MapInputWidgetState extends State<MapInputWidget> {
     }
 
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.bestForNavigation);
     LatLng userLatLng = LatLng(position.latitude, position.longitude);
 
     setState(() {
@@ -94,7 +94,7 @@ class _MapInputWidgetState extends State<MapInputWidget> {
                   child: GoogleMap(
                     initialCameraPosition: CameraPosition(
                       target: currentPosition!,
-                      zoom: 15,
+                      zoom: 17,
                     ),
                     onMapCreated: (controller) {
                       mapController = controller;
