@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import './custom_textfield.dart';
 
 class AddressInput extends StatefulWidget {
   final TextEditingController originAddressController;
@@ -17,19 +21,40 @@ class AddressInput extends StatefulWidget {
 class _AddressInputState extends State<AddressInput> {
   late FocusNode originFocusNode;
   late FocusNode destinationFocusNode;
+  List<String> suggestions = [];
+  List<String> originSuggestions = [];
+  List<String> destinationSuggestions = [];
+  bool isOriginFocused = false;
+  String apiKey = dotenv.env['API_KEY'] ?? '';
+  bool isTypingOrigin = false;
 
   @override
   void initState() {
     super.initState();
+    loadEnv();
     originFocusNode = FocusNode();
     destinationFocusNode = FocusNode();
 
     originFocusNode.addListener(() {
-      if (originFocusNode.hasFocus) {
-        setState(() {
-          //que cambie el nombre
-        });
-      }
+      setState(() {
+        isTypingOrigin = originFocusNode.hasFocus;
+        if (!originFocusNode.hasFocus) originSuggestions.clear();
+      });
+    });
+
+    destinationFocusNode.addListener(() {
+      setState(() {
+        isTypingOrigin =
+            !destinationFocusNode.hasFocus ? false : isTypingOrigin;
+        if (!destinationFocusNode.hasFocus) destinationSuggestions.clear();
+      });
+    });
+  }
+
+  Future<void> loadEnv() async {
+    await dotenv.load();
+    setState(() {
+      apiKey = dotenv.env['API_KEY'] ?? '';
     });
   }
 
@@ -40,74 +65,110 @@ class _AddressInputState extends State<AddressInput> {
     super.dispose();
   }
 
+  Future<void> fetchSuggestions(String input, bool isOrigin) async {
+    if (input.isEmpty) {
+      setState(() {
+        if (isOrigin) {
+          originSuggestions.clear();
+        } else {
+          destinationSuggestions.clear();
+        }
+      });
+      return;
+    }
+    const String baseUrl =
+        "https://maps.googleapis.com/maps/api/place/autocomplete/json";
+    final Uri uri = Uri.parse('$baseUrl?input=$input&key=$apiKey');
+
+    try {
+      final response = await Dio().get(uri.toString());
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        setState(() {
+          if (isOrigin) {
+            originSuggestions = (data['predictions'] as List)
+                .map((item) => item['description'] as String)
+                .toList();
+          } else {
+            destinationSuggestions = (data['predictions'] as List)
+                .map((item) => item['description'] as String)
+                .toList();
+          }
+        });
+      }
+    } catch (e) {
+      print('error fetching suggestions: $e');
+    }
+  }
+
+  void onSuggestionTap(String address, bool isOrigin) {
+    setState(() {
+      if (isOrigin) {
+        widget.originAddressController.text = address;
+        originSuggestions.clear();
+        widget.originAddressController.selection =
+            TextSelection.fromPosition(const TextPosition(offset: 0));
+      } else {
+        widget.destinationAddressController.text = address;
+        destinationSuggestions.clear();
+        widget.destinationAddressController.selection =
+            TextSelection.fromPosition(const TextPosition(offset: 0));
+      }
+    });
+  }
+
   Widget build(BuildContext context) {
-    print('entro');
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          originFocusNode.hasFocus
-              ? 'Pickup'
-              : destinationFocusNode.hasFocus
-                  ? 'Drop off'
-                  : 'Pickup',
-        ),
+        title: Text(isTypingOrigin ? 'Pickup' : 'Drop off'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          children: [
-            TextField(
-              controller: widget.originAddressController,
-              focusNode: originFocusNode, // Associate with focus node
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w400,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            children: [
+              CustomTextField(
+                controller: widget.originAddressController,
+                focusNode: originFocusNode,
+                icon: const Icon(Icons.arrow_upward_outlined),
+                hintText: 'Enter origin location...',
+                isOrigin: true,
+                suggestions: originSuggestions,
+                onSuggestionTap: onSuggestionTap,
+                fetchSuggestions: fetchSuggestions,
+                onTap: (isOrigin) {
+                  Future.microtask(() {
+                    if (mounted) {
+                      setState(() {
+                        isTypingOrigin = isOrigin;
+                      });
+                    }
+                  });
+                },
               ),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color.fromARGB(255, 248, 246, 246),
-                prefixIcon: const Icon(Icons.arrow_upward_outlined),
-                hintText: 'Enter pickup location...',
-                hintStyle: const TextStyle(
-                  color: Colors.black,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    color: Colors.indigo,
-                  ),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-              ),
-            ),
-            const SizedBox(height: 15),
-            TextField(
-              controller: widget.destinationAddressController,
-              focusNode: destinationFocusNode, // Associate with focus node
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w400,
-              ),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color.fromARGB(255, 248, 246, 246),
-                prefixIcon: const Icon(Icons.arrow_downward_outlined),
+              const SizedBox(height: 15),
+              CustomTextField(
+                controller: widget.destinationAddressController,
+                focusNode: destinationFocusNode,
+                icon: const Icon(Icons.arrow_downward_outlined),
                 hintText: 'Enter destination location...',
-                hintStyle: const TextStyle(
-                  color: Colors.black,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    color: Colors.indigo,
-                  ),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                isOrigin: false,
+                suggestions: destinationSuggestions,
+                onSuggestionTap: onSuggestionTap,
+                fetchSuggestions: fetchSuggestions,
+                onTap: (isOrigin) {
+                  Future.microtask(() {
+                    if (mounted) {
+                      setState(() {
+                        isTypingOrigin = isOrigin;
+                      });
+                    }
+                  });
+                },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
