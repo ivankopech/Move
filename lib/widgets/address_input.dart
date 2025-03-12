@@ -116,6 +116,13 @@ class _AddressInputState extends State<AddressInput> {
             TextSelection.fromPosition(const TextPosition(offset: 0));
       }
     });
+
+    if (!isOrigin) {
+      Navigator.pop(context, {
+        'origin': widget.originAddressController.text,
+        'destination': widget.destinationAddressController.text,
+      });
+    }
   }
 
   Widget build(BuildContext context) {
