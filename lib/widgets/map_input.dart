@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:move_app/screens/address_input.dart';
 
 import '../widgets/drawer.dart';
 import '../widgets/bottom_sheet.dart';
@@ -82,6 +83,20 @@ class _MapInputWidgetState extends State<MapInputWidget> {
     }
   }
 
+  Future<void> openAddressInput() async {
+    final result = await Navigator.of(context)
+        .pushNamed(AddressInputScreen.routeName, arguments: {
+      'originController': originAddressController,
+      'destinationController': destinationAddressController,
+    });
+    if (result != null && result is Map<String, String>) {
+      setState(() {
+        originAddressController.text = result['origin']!;
+        destinationAddressController.text = result['destination']!;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,6 +153,7 @@ class _MapInputWidgetState extends State<MapInputWidget> {
                   originAddressController: originAddressController,
                   destinationAddressController: destinationAddressController,
                   locController: markerAddressController,
+                  onAddressTap: openAddressInput,
                 ),
               ],
             ),
