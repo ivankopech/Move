@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:move_app/screens/address_input.dart';
+
+import './map_input.dart';
 
 class ScrollableSheet extends StatefulWidget {
   final TextEditingController originAddressController;
   final TextEditingController destinationAddressController;
   final TextEditingController locController;
+  final VoidCallback onAddressTap;
 
   const ScrollableSheet({
     Key? key,
     required this.originAddressController,
     required this.destinationAddressController,
     required this.locController,
+    required this.onAddressTap,
   }) : super(key: key);
 
   @override
@@ -46,10 +49,7 @@ class _ScrollableSheetState extends State<ScrollableSheet> {
                     children: [
                       TextField(
                         controller: widget.originAddressController,
-                        onTap: () {
-                          Navigator.of(context)
-                              .pushNamed(AddressInputScreen.routeName);
-                        },
+                        onTap: widget.onAddressTap,
                         style: const TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w400,
@@ -72,26 +72,57 @@ class _ScrollableSheetState extends State<ScrollableSheet> {
                               vertical: 10, horizontal: 12),
                         ),
                       ),
-                      const SizedBox(height: 15),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on,
-                            color: Colors.indigo,
-                            size: 30,
+                      if (widget.originAddressController.text.isNotEmpty) ...[
+                        const SizedBox(height: 15),
+                        TextField(
+                          controller: widget.destinationAddressController,
+                          onTap: widget.onAddressTap,
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w400,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              widget.locController.text,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w300,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color.fromARGB(255, 248, 246, 246),
+                            prefixIcon: const Icon(Icons.arrow_upward_outlined),
+                            hintText: 'Enter drop-off location...',
+                            hintStyle: const TextStyle(
+                              color: Colors.black,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: const BorderSide(
+                                color: Colors.indigo,
                               ),
                             ),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 12),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                      if (widget.originAddressController.text.isEmpty &&
+                          widget.destinationAddressController.text.isEmpty) ...[
+                        const SizedBox(height: 15),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.location_on,
+                              color: Colors.indigo,
+                              size: 30,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                widget.locController.text,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ]
                     ],
                   ),
                 ),
