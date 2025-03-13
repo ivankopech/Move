@@ -26,7 +26,7 @@ class _ScrollableSheetState extends State<ScrollableSheet> {
     return DraggableScrollableSheet(
       initialChildSize: 0.1,
       minChildSize: 0.1,
-      maxChildSize: 0.4,
+      maxChildSize: 0.3,
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
@@ -97,6 +97,37 @@ class _ScrollableSheetState extends State<ScrollableSheet> {
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 12),
+                          ),
+                        ),
+                      ],
+                      if (widget.originAddressController.text.isNotEmpty) ...[
+                        const SizedBox(height: 15),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Colors.indigo, Colors.purple],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Container(
+                              constraints: const BoxConstraints(
+                                minWidth: 100,
+                                minHeight: 50,
+                              ),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                "Continuar",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            ),
                           ),
                         ),
                       ],
