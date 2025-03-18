@@ -4,9 +4,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:move_app/screens/address_input.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../widgets/drawer.dart';
 import '../widgets/bottom_sheet.dart';
+import '../widgets/map_helper.dart';
 
 class MapInputWidget extends StatefulWidget {
   const MapInputWidget({super.key});
@@ -23,11 +25,22 @@ class _MapInputWidgetState extends State<MapInputWidget> {
   TextEditingController originAddressController = TextEditingController();
   TextEditingController destinationAddressController = TextEditingController();
   TextEditingController markerAddressController = TextEditingController();
+  Set<Marker> markers = {};
+  Set<Polyline> polylines = {};
+  String apiKey = dotenv.env['API_KEY'] ?? '';
 
   @override
   void initState() {
     super.initState();
     currentLocation();
+    loadEnv();
+  }
+
+  Future<void> loadEnv() async {
+    await dotenv.load();
+    setState(() {
+      apiKey = dotenv.env['API_KEY'] ?? '';
+    });
   }
 
   Future<void> currentLocation() async {
@@ -94,6 +107,35 @@ class _MapInputWidgetState extends State<MapInputWidget> {
         originAddressController.text = result['origin']!;
         destinationAddressController.text = result['destination']!;
       });
+      updateMap();
+    }
+  }
+
+  Future<void> updateMap() async {
+    if (originAddressController.text.isNotEmpty &&
+        destinationAddressController.text.isNotEmpty) {
+      try {
+        Set<Marker> marker = await MapHelper.generateMarkers(
+          origin: originAddressController.text,
+          destination: destinationAddressController.text,
+        );
+        Polyline polyline = await MapHelper.generatePolyline(
+          origin: originAddressController.text,
+          destination: destinationAddressController.text,
+          apiKey: apiKey,
+        );
+        setState(() {
+          markers = marker;
+          polylines = {polyline};
+        });
+        if (markers.isNotEmpty) {
+          mapController?.animateCamera(
+            CameraUpdate.newLatLng(marker.first.position),
+          );
+        }
+      } catch (e) {
+        print('error es: $e');
+      }
     }
   }
 
@@ -113,7 +155,10 @@ class _MapInputWidgetState extends State<MapInputWidget> {
                     ),
                     onMapCreated: (controller) {
                       mapController = controller;
+                      updateMap();
                     },
+                    markers: markers,
+                    polylines: polylines,
                     onCameraIdle: () {
                       if (selectedPosition != null) {
                         getAddressLatLng(selectedPosition!);
