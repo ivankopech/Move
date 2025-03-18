@@ -24,7 +24,7 @@ class _ScrollableSheetState extends State<ScrollableSheet> {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.1,
+      initialChildSize: 0.2,
       minChildSize: 0.1,
       maxChildSize: 0.3,
       builder: (context, scrollController) {
@@ -125,7 +125,9 @@ class _ScrollableSheetState extends State<ScrollableSheet> {
                               child: const Text(
                                 "Continuar",
                                 style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ),
