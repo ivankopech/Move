@@ -39,6 +39,7 @@ dependencies:
   geocoding: ^3.0.0
   geolocator: ^11.1.0
   dio: ^5.8.0+1
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
