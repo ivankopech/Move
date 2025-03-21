@@ -7,8 +7,9 @@ import 'package:move_app/screens/address_input.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../widgets/drawer.dart';
-import '../widgets/bottom_sheet.dart';
+import './input_address_sheet.dart';
 import '../widgets/map_helper.dart';
+import './select_vehicle_sheet.dart';
 
 class MapInputWidget extends StatefulWidget {
   const MapInputWidget({super.key});
@@ -28,6 +29,7 @@ class _MapInputWidgetState extends State<MapInputWidget> {
   Set<Marker> markers = {};
   Set<Polyline> polylines = {};
   String apiKey = dotenv.env['API_KEY'] ?? '';
+  bool showInputSheet = true;
 
   @override
   void initState() {
@@ -139,6 +141,12 @@ class _MapInputWidgetState extends State<MapInputWidget> {
     }
   }
 
+  void toggleSheet() {
+    setState(() {
+      showInputSheet = !showInputSheet;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,12 +202,16 @@ class _MapInputWidgetState extends State<MapInputWidget> {
                     },
                   ),
                 ),
-                ScrollableSheet(
-                  originAddressController: originAddressController,
-                  destinationAddressController: destinationAddressController,
-                  locController: markerAddressController,
-                  onAddressTap: openAddressInput,
-                ),
+                showInputSheet
+                    ? InputAddressSheet(
+                        originAddressController: originAddressController,
+                        destinationAddressController:
+                            destinationAddressController,
+                        locController: markerAddressController,
+                        onAddressTap: openAddressInput,
+                        onContinue: toggleSheet,
+                      )
+                    : SelectVehicleSheet(),
               ],
             ),
     );
