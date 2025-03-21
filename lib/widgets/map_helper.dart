@@ -45,6 +45,7 @@ class MapHelper {
     LatLng destinationLatLng = await getLatLngFromAddress(destination);
 
     PolylinePoints polylinePoints = PolylinePoints();
+
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       apiKey,
       PointLatLng(originLatLng.latitude, originLatLng.longitude),
