@@ -1,0 +1,1 @@
+export 'sample_repository_interface.dart';
