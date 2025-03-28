@@ -128,6 +128,11 @@ app.*.map.json
 !.idea/runConfigurations/
 
 
-# Flutter plugin registrant files
-linux/flutter/generated_plugin_registrant.*
-windows/flutter/generated_plugin_registrant.*
+# Generated plugin files (do not commit)
+linux/flutter/generated_plugins.cmake
+windows/flutter/generated_plugins.cmake
+macos/Flutter/GeneratedPluginRegistrant.swift
+**/generated_plugin_registrant.*
+**/generated_plugins.cmake
+**/GeneratedPluginRegistrant.*
+
