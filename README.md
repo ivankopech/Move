@@ -2,6 +2,8 @@
 
 A new Flutter project.
 
+Using Flutter 3.29.2 • channel stable 
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
