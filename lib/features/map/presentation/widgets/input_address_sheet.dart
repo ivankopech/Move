@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import './map_input.dart';
 
 class InputAddressSheet extends StatefulWidget {
   final TextEditingController originAddressController;
@@ -10,19 +9,19 @@ class InputAddressSheet extends StatefulWidget {
   final Function onContinue;
 
   const InputAddressSheet({
-    Key? key,
+    super.key,
     required this.originAddressController,
     required this.destinationAddressController,
     required this.locController,
     required this.onAddressTap,
     required this.onContinue,
-  }) : super(key: key);
+  });
 
   @override
-  _InputAddressSheetState createState() => _InputAddressSheetState();
+  InputAddressSheetState createState() => InputAddressSheetState();
 }
 
-class _InputAddressSheetState extends State<InputAddressSheet> {
+class InputAddressSheetState extends State<InputAddressSheet> {
   bool showTextFieldButton = false;
 
   @override

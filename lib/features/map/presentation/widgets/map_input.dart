@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:move_app/screens/address_input.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:move/features/map/presentation/screens/address_input.dart';
 
 import '../widgets/drawer.dart';
 import './input_address_sheet.dart';
@@ -70,7 +71,8 @@ class _MapInputWidgetState extends State<MapInputWidget> {
     }
 
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation);
+      desiredAccuracy: LocationAccuracy.bestForNavigation,
+    );
     LatLng userLatLng = LatLng(position.latitude, position.longitude);
 
     setState(() {
@@ -82,8 +84,10 @@ class _MapInputWidgetState extends State<MapInputWidget> {
 
   Future<void> getAddressLatLng(LatLng position) async {
     try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks.first;
@@ -99,12 +103,15 @@ class _MapInputWidgetState extends State<MapInputWidget> {
   }
 
   Future<void> openAddressInput() async {
-    final result = await Navigator.of(context)
-        .pushNamed(AddressInputScreen.routeName, arguments: {
-      'originController': originAddressController,
-      'destinationController': destinationAddressController,
-    });
-    if (result != null && result is Map<String, String>) {
+    final result = await context.push<Map<String, String>>(
+      AddressInputScreen.path,
+      extra: {
+        'originController': originAddressController,
+        'destinationController': destinationAddressController,
+      },
+    );
+
+    if (result != null) {
       setState(() {
         originAddressController.text = result['origin']!;
         destinationAddressController.text = result['destination']!;
@@ -151,59 +158,60 @@ class _MapInputWidgetState extends State<MapInputWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const AppDrawer(),
-      body: currentPosition == null
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                Positioned.fill(
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: currentPosition!,
-                      zoom: 17,
+      body:
+          currentPosition == null
+              ? const Center(child: CircularProgressIndicator())
+              : Stack(
+                children: [
+                  Positioned.fill(
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: currentPosition!,
+                        zoom: 17,
+                      ),
+                      onMapCreated: (controller) {
+                        mapController = controller;
+                        updateMap();
+                      },
+                      markers: markers,
+                      polylines: polylines,
+                      onCameraIdle: () {
+                        if (selectedPosition != null) {
+                          getAddressLatLng(selectedPosition!);
+                        }
+                      },
+                      onCameraMove: (position) {
+                        setState(() {
+                          selectedPosition = position.target;
+                        });
+                      },
                     ),
-                    onMapCreated: (controller) {
-                      mapController = controller;
-                      updateMap();
-                    },
-                    markers: markers,
-                    polylines: polylines,
-                    onCameraIdle: () {
-                      if (selectedPosition != null) {
-                        getAddressLatLng(selectedPosition!);
-                      }
-                    },
-                    onCameraMove: (position) {
-                      setState(() {
-                        selectedPosition = position.target;
-                      });
-                    },
                   ),
-                ),
-                Positioned(
-                  top: MediaQuery.of(context).size.height / 2 - 24,
-                  left: MediaQuery.of(context).size.width / 2 - 24,
-                  child: const Icon(
-                    Icons.location_on,
-                    size: 60,
-                    color: Colors.indigo,
+                  Positioned(
+                    top: MediaQuery.of(context).size.height / 2 - 24,
+                    left: MediaQuery.of(context).size.width / 2 - 24,
+                    child: const Icon(
+                      Icons.location_on,
+                      size: 60,
+                      color: Colors.indigo,
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: 70,
-                  left: 15,
-                  child: Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.waving_hand_outlined),
-                        onPressed: () {
-                          Scaffold.of(context).openDrawer();
-                        },
-                      );
-                    },
+                  Positioned(
+                    top: 70,
+                    left: 15,
+                    child: Builder(
+                      builder: (context) {
+                        return IconButton(
+                          icon: const Icon(Icons.waving_hand_outlined),
+                          onPressed: () {
+                            Scaffold.of(context).openDrawer();
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                showInputSheet
-                    ? InputAddressSheet(
+                  showInputSheet
+                      ? InputAddressSheet(
                         originAddressController: originAddressController,
                         destinationAddressController:
                             destinationAddressController,
@@ -211,9 +219,9 @@ class _MapInputWidgetState extends State<MapInputWidget> {
                         onAddressTap: openAddressInput,
                         onContinue: toggleSheet,
                       )
-                    : SelectVehicleSheet(),
-              ],
-            ),
+                      : SelectVehicleSheet(),
+                ],
+              ),
     );
   }
 }

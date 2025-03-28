@@ -1,39 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:move_app/screens/address_input.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:move/config/router/router_provider.dart';
 
-import 'screens/map_input.dart';
-import './widgets/address_input.dart';
-
-void main() async {
+Future<void> main() async {
   await dotenv.load(fileName: '.env');
-  runApp(const MyApp());
+  runApp(ProviderScope(child: const MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(),
-      home: const MapInputScreen(),
-      debugShowCheckedModeBanner: false,
-      onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute(
-          builder: (ctx) {
-            switch (settings.name) {
-              case MapInputScreen.routeName:
-                return const MapInputScreen();
-              case AddressInputScreen.routeName:
-                return const AddressInputScreen();
-              default:
-                return const MapInputScreen();
-            }
-          },
-        );
-      },
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final goRouter = ref.watch(goRouterProvider);
+    return MaterialApp.router(title: 'Flutter Demo', routerConfig: goRouter);
   }
 }

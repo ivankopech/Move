@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 
 import './custom_textfield.dart';
 
@@ -27,6 +28,8 @@ class _AddressInputState extends State<AddressInput> {
   bool isOriginFocused = false;
   String apiKey = dotenv.env['API_KEY'] ?? '';
   bool isTypingOrigin = false;
+  late TextEditingController originController;
+  late TextEditingController destinationController;
 
   @override
   void initState() {
@@ -49,6 +52,15 @@ class _AddressInputState extends State<AddressInput> {
         if (!destinationFocusNode.hasFocus) destinationSuggestions.clear();
       });
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final extra =
+        GoRouterState.of(context).extra as Map<String, TextEditingController>;
+    originController = extra['originController']!;
+    destinationController = extra['destinationController']!;
   }
 
   Future<void> loadEnv() async {
@@ -87,13 +99,15 @@ class _AddressInputState extends State<AddressInput> {
         final data = response.data;
         setState(() {
           if (isOrigin) {
-            originSuggestions = (data['predictions'] as List)
-                .map((item) => item['description'] as String)
-                .toList();
+            originSuggestions =
+                (data['predictions'] as List)
+                    .map((item) => item['description'] as String)
+                    .toList();
           } else {
-            destinationSuggestions = (data['predictions'] as List)
-                .map((item) => item['description'] as String)
-                .toList();
+            destinationSuggestions =
+                (data['predictions'] as List)
+                    .map((item) => item['description'] as String)
+                    .toList();
           }
         });
       }
@@ -107,8 +121,9 @@ class _AddressInputState extends State<AddressInput> {
       if (isOrigin) {
         widget.originAddressController.text = address;
         originSuggestions.clear();
-        widget.originAddressController.selection =
-            TextSelection.fromPosition(const TextPosition(offset: 0));
+        widget.originAddressController.selection = TextSelection.fromPosition(
+          const TextPosition(offset: 0),
+        );
       } else {
         widget.destinationAddressController.text = address;
         destinationSuggestions.clear();
@@ -118,25 +133,28 @@ class _AddressInputState extends State<AddressInput> {
     });
 
     if (!isOrigin) {
-      Navigator.pop(context, {
-        'origin': widget.originAddressController.text,
-        'destination': widget.destinationAddressController.text,
+      // Navigator.pop(context, {
+      //   'origin': widget.originAddressController.text,
+      //   'destination': widget.destinationAddressController.text,
+      // });
+      context.pop({
+        'origin': originController.text,
+        'destination': destinationController.text,
       });
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isTypingOrigin ? 'Pickup' : 'Drop off'),
-      ),
+      appBar: AppBar(title: Text(isTypingOrigin ? 'Pickup' : 'Drop off')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(15),
           child: Column(
             children: [
               CustomTextField(
-                controller: widget.originAddressController,
+                controller: originController,
                 focusNode: originFocusNode,
                 icon: const Icon(Icons.arrow_upward_outlined),
                 hintText: 'Enter origin location...',
@@ -156,7 +174,7 @@ class _AddressInputState extends State<AddressInput> {
               ),
               const SizedBox(height: 15),
               CustomTextField(
-                controller: widget.destinationAddressController,
+                controller: destinationController,
                 focusNode: destinationFocusNode,
                 icon: const Icon(Icons.arrow_downward_outlined),
                 hintText: 'Enter destination location...',

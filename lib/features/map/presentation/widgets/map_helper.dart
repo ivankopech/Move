@@ -28,8 +28,9 @@ class MapHelper {
           markerId: const MarkerId('destination'),
           position: destinationLatLng,
           infoWindow: InfoWindow(title: 'Destination: $destination'),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueGreen,
+          ),
         ),
       );
     }
@@ -46,23 +47,31 @@ class MapHelper {
 
     PolylinePoints polylinePoints = PolylinePoints();
 
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      apiKey,
-      PointLatLng(originLatLng.latitude, originLatLng.longitude),
-      PointLatLng(destinationLatLng.latitude, destinationLatLng.longitude),
+    final result = await polylinePoints.getRouteBetweenCoordinates(
+      googleApiKey: apiKey,
+      request: PolylineRequest(
+        origin: PointLatLng(originLatLng.latitude, originLatLng.longitude),
+        destination: PointLatLng(
+          destinationLatLng.latitude,
+          destinationLatLng.longitude,
+        ),
+        mode: TravelMode.driving, 
+      ),
     );
 
-    List<LatLng> polylineCoordinates = result.points
-        .map((PointLatLng point) => LatLng(point.latitude, point.longitude))
-        .toList();
+    List<LatLng> polylineCoordinates =
+        result.points
+            .map((PointLatLng point) => LatLng(point.latitude, point.longitude))
+            .toList();
 
     return Polyline(
       polylineId: const PolylineId('route'),
       color: Colors.indigo,
       width: 5,
-      points: polylineCoordinates.isNotEmpty
-          ? polylineCoordinates
-          : [originLatLng, destinationLatLng],
+      points:
+          polylineCoordinates.isNotEmpty
+              ? polylineCoordinates
+              : [originLatLng, destinationLatLng],
     );
   }
 

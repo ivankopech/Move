@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../widgets/address_input.dart';
 
 class AddressInputScreen extends StatefulWidget {
-  static const routeName = '/address-input';
+  static const path = '/address-input';
+    static const name = 'address-input';
 
   const AddressInputScreen({super.key});
 

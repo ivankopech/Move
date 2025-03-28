@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../widgets/map_input.dart';
 
 class MapInputScreen extends StatefulWidget {
-  static const routeName = '/location-input';
+  static const path = '/location-input';
+  static const name = 'location-input';
   const MapInputScreen({super.key});
 
   @override
