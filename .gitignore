@@ -126,3 +126,8 @@ app.*.map.json
 !.idea/codeStyles/
 !.idea/dictionaries/
 !.idea/runConfigurations/
+
+
+# Flutter plugin registrant files
+linux/flutter/generated_plugin_registrant.*
+windows/flutter/generated_plugin_registrant.*
