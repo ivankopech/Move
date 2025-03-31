@@ -1,6 +1,6 @@
 {
-    "name": "move_app",
-    "short_name": "move_app",
+    "name": "move",
+    "short_name": "move",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
