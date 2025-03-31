@@ -7,7 +7,7 @@ class SampleStateNotifier
   final SampleUseCase sampleUseCase;
 
   SampleStateNotifier({required this.sampleUseCase})
-    : super(const AsyncValue.loading());
+      : super(const AsyncValue.loading());
 
   late SampleResponseModel sampleResponseModel;
 
