@@ -359,7 +359,7 @@ class _ArrivalTimeState extends State<ArrivalTime> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Set arrival time')),
+      appBar: AppBar(title: Text('Set arrival time'), leading: BackButton()),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: Column(
