@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
+import '../screens/item_information.dart';
 
 class ArrivalTime extends StatefulWidget {
   const ArrivalTime({super.key});
@@ -324,11 +327,14 @@ class _ArrivalTimeState extends State<ArrivalTime> {
           ),
           SizedBox(height: 30),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final date = dateLabels[selectedDateIndex];
               final time = timeSlots[selectedTimeIndex];
               final result = '$date | $time';
               print('selected $result');
+              await context.push<Map<String, String>>(
+                ItemInformationScreen.path,
+              );
             },
             style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
 
@@ -359,7 +365,7 @@ class _ArrivalTimeState extends State<ArrivalTime> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Set arrival time'), leading: BackButton()),
+      appBar: AppBar(title: Text('Set arrival time')),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: Column(
