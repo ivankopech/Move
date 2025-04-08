@@ -12,6 +12,8 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>GMSApiKey</key>
+	<string>$(apiKey)</string>
 	<key>CFBundleName</key>
 	<string>move</string>
 	<key>CFBundlePackageType</key>
