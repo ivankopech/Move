@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class InputAddressSheet extends StatefulWidget {
   final TextEditingController originAddressController;
   final TextEditingController destinationAddressController;
@@ -40,11 +39,7 @@ class InputAddressSheetState extends State<InputAddressSheet> {
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black,
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black)],
           ),
           child: Stack(
             children: [
@@ -63,28 +58,29 @@ class InputAddressSheetState extends State<InputAddressSheet> {
                           fontWeight: FontWeight.w400,
                         ),
                         decoration: InputDecoration(
-                            filled: true,
-                            fillColor: const Color.fromARGB(255, 248, 246, 246),
-                            prefixIcon: const Icon(Icons.arrow_upward_outlined),
-                            hintText: 'Enter pickup location...',
-                            hintStyle: const TextStyle(
-                              color: Colors.black,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: const BorderSide(
-                                color: Colors.indigo,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 12),
-                            suffixIcon: showTextFieldButton
-                                ? IconButton(
+                          filled: true,
+                          fillColor: const Color.fromARGB(255, 248, 246, 246),
+                          prefixIcon: const Icon(Icons.arrow_upward_outlined),
+                          hintText: 'Enter pickup location...',
+                          hintStyle: const TextStyle(color: Colors.black),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(color: Colors.indigo),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 12,
+                          ),
+                          suffixIcon:
+                              showTextFieldButton
+                                  ? IconButton(
                                     onPressed: () {},
-                                    icon:
-                                        const Icon(Icons.other_houses_outlined),
+                                    icon: const Icon(
+                                      Icons.other_houses_outlined,
+                                    ),
                                   )
-                                : null),
+                                  : null,
+                        ),
                       ),
                       if (widget.originAddressController.text.isNotEmpty) ...[
                         const SizedBox(height: 15),
@@ -100,9 +96,7 @@ class InputAddressSheetState extends State<InputAddressSheet> {
                             fillColor: const Color.fromARGB(255, 248, 246, 246),
                             prefixIcon: const Icon(Icons.arrow_upward_outlined),
                             hintText: 'Enter drop-off location...',
-                            hintStyle: const TextStyle(
-                              color: Colors.black,
-                            ),
+                            hintStyle: const TextStyle(color: Colors.black),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: const BorderSide(
@@ -110,7 +104,9 @@ class InputAddressSheetState extends State<InputAddressSheet> {
                               ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 12),
+                              vertical: 10,
+                              horizontal: 12,
+                            ),
                           ),
                         ),
                       ],
@@ -139,7 +135,7 @@ class InputAddressSheetState extends State<InputAddressSheet> {
                               ),
                               alignment: Alignment.center,
                               child: const Text(
-                                "Continuar",
+                                "Continue",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -171,7 +167,7 @@ class InputAddressSheetState extends State<InputAddressSheet> {
                             ),
                           ],
                         ),
-                      ]
+                      ],
                     ],
                   ),
                 ),
