@@ -20,36 +20,38 @@ class _SelectVehicleSheetState extends State<SelectVehicleSheet> {
       "luggers": 1,
       "basePrice": 64.24,
       "perMinute": 0.95,
-      "image": "assets/images/pickup.png"
+      "description":
+          "Perfect for moving your sofa, some boxes or just a few items",
+      "image": "assets/images/pickup.png",
     },
     {
       "title": "Pickup",
       "luggers": 2,
       "basePrice": 82.58,
       "perMinute": 1.62,
-      "image": "assets/images/pickup.png"
+      "image": "assets/images/pickup.png",
     },
     {
       "title": "Van",
       "luggers": 2,
       "basePrice": 131.21,
       "perMinute": 2.02,
-      "image": "assets/images/pickup.png"
+      "image": "assets/images/pickup.png",
     },
     {
       "title": "XL",
       "luggers": 2,
       "basePrice": 207.25,
       "perMinute": 2.30,
-      "image": "assets/images/pickup.png"
+      "image": "assets/images/pickup.png",
     },
     {
       "title": "Box",
       "luggers": 2,
       "basePrice": 272.82,
       "perMinute": 3.00,
-      "image": "assets/images/pickup.png"
-    }
+      "image": "assets/images/pickup.png",
+    },
   ];
   @override
   Widget build(BuildContext context) {
@@ -62,11 +64,7 @@ class _SelectVehicleSheetState extends State<SelectVehicleSheet> {
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-              )
-            ],
+            boxShadow: [BoxShadow(color: Colors.black12)],
           ),
           child: SingleChildScrollView(
             controller: scrollController,
@@ -93,9 +91,15 @@ class _SelectVehicleSheetState extends State<SelectVehicleSheet> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                             side: BorderSide(
-                              color: isSelected
-                                  ? Colors.indigo
-                                  : const Color.fromARGB(255, 203, 203, 203),
+                              color:
+                                  isSelected
+                                      ? Colors.indigo
+                                      : const Color.fromARGB(
+                                        255,
+                                        203,
+                                        203,
+                                        203,
+                                      ),
                             ),
                           ),
                           margin: const EdgeInsets.symmetric(vertical: 5),
@@ -115,8 +119,9 @@ class _SelectVehicleSheetState extends State<SelectVehicleSheet> {
                                           Text(
                                             vehicle["title"],
                                             style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold),
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                           const SizedBox(width: 5),
                                           SizedBox(
@@ -124,7 +129,8 @@ class _SelectVehicleSheetState extends State<SelectVehicleSheet> {
                                             width: 100,
                                             child: Chip(
                                               label: Text(
-                                                  "${vehicle["luggers"]} Luggers"),
+                                                "${vehicle["luggers"]} Luggers",
+                                              ),
                                               backgroundColor:
                                                   vehicle['luggers'] == 1
                                                       ? Colors.red.shade100
@@ -132,14 +138,15 @@ class _SelectVehicleSheetState extends State<SelectVehicleSheet> {
                                               labelStyle:
                                                   vehicle['luggers'] == 1
                                                       ? const TextStyle(
-                                                          color: Colors.red,
-                                                        )
+                                                        color: Colors.red,
+                                                      )
                                                       : const TextStyle(
-                                                          color: Colors.indigo,
-                                                        ),
+                                                        color: Colors.indigo,
+                                                      ),
                                               shape: RoundedRectangleBorder(
                                                 side: const BorderSide(
-                                                    color: Colors.transparent),
+                                                  color: Colors.transparent,
+                                                ),
                                                 borderRadius:
                                                     BorderRadius.circular(10),
                                               ),
@@ -151,14 +158,19 @@ class _SelectVehicleSheetState extends State<SelectVehicleSheet> {
                                       Text(
                                         "\$${vehicle["basePrice"]} + \$${vehicle["perMinute"]} per min labor",
                                         style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[700]),
+                                          fontSize: 14,
+                                          color: Colors.grey[700],
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Image.asset(vehicle["image"],
-                                    width: 80, height: 60, fit: BoxFit.contain),
+                                Image.asset(
+                                  vehicle["image"],
+                                  width: 80,
+                                  height: 60,
+                                  fit: BoxFit.contain,
+                                ),
                               ],
                             ),
                           ),
