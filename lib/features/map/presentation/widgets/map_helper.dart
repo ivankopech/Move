@@ -55,7 +55,7 @@ class MapHelper {
           destinationLatLng.latitude,
           destinationLatLng.longitude,
         ),
-        mode: TravelMode.driving, 
+        mode: TravelMode.driving,
       ),
     );
 
@@ -79,6 +79,9 @@ class MapHelper {
     try {
       List<Location> locations = await locationFromAddress(address);
       if (locations.isNotEmpty) {
+        print(
+          'lat: ${locations.first.latitude}, long ${locations.first.longitude}',
+        );
         return LatLng(locations.first.latitude, locations.first.longitude);
       }
     } catch (e) {
