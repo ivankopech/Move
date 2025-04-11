@@ -25,7 +25,7 @@ class _PhoneNumberState extends State<PhoneNumber> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              "Enter your number to get started. We’ll use this number to send updates on your move or delivery.",
+              'Enter your number to get started. We\'ll use this number to send updates on your move or delivery.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.black54),
             ),
@@ -39,6 +39,7 @@ class _PhoneNumberState extends State<PhoneNumber> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              disableLengthCheck: true,
               initialCountryCode: 'US',
               onChanged: (phone) {
                 print(phone.completeNumber);
@@ -67,7 +68,7 @@ class _PhoneNumberState extends State<PhoneNumber> {
                     ),
                     alignment: Alignment.center,
                     child: const Text(
-                      "Continuar",
+                      "Continue",
                       style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
