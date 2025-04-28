@@ -351,7 +351,7 @@ class _ArrivalTimeState extends State<ArrivalTime> {
                 constraints: const BoxConstraints(minWidth: 100, minHeight: 50),
                 alignment: Alignment.center,
                 child: const Text(
-                  "Continuar",
+                  "Continue",
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),

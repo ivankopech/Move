@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:move/config/router/router_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: '.env');
+  await Firebase.initializeApp();
+  // await InAppPayments.setSquareApplicationId(
+  //   'sandbox-sq0idb-1nbetFUXtAYw13HgMPx0HA',
+  // );
+
   runApp(ProviderScope(child: const MyApp()));
 }
 

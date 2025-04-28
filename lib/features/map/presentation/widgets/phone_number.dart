@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../screens/code_verification.dart';
 
 class PhoneNumber extends StatefulWidget {
   const PhoneNumber({super.key});
@@ -9,6 +13,43 @@ class PhoneNumber extends StatefulWidget {
 }
 
 class _PhoneNumberState extends State<PhoneNumber> {
+  String? phoneNumber;
+  bool loading = false;
+
+  Future<void> sendCode() async {
+    print(phoneNumber);
+    if (phoneNumber == null) return;
+
+    setState(() => loading = true);
+
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) {
+          // Esto se llama si el teléfono se verifica automáticamente
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          context.pushReplacementNamed(
+            CodeVerificationScreen.name,
+            extra: verificationId,
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al enviar el código')));
+    } finally {
+      setState(() => loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -42,14 +83,16 @@ class _PhoneNumberState extends State<PhoneNumber> {
               disableLengthCheck: true,
               initialCountryCode: 'US',
               onChanged: (phone) {
-                print(phone.completeNumber);
+                phoneNumber = phone.completeNumber;
               },
             ),
             const Spacer(),
             Container(
               margin: const EdgeInsets.all(15),
               child: ElevatedButton(
-                onPressed: () async {},
+                onPressed: () async {
+                  await sendCode();
+                },
                 style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
 
                 child: Ink(
