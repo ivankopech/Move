@@ -17,6 +17,7 @@ class _PhoneNumberState extends State<PhoneNumber> {
   bool loading = false;
 
   Future<void> sendCode() async {
+    print(phoneNumber);
     if (phoneNumber == null) return;
 
     setState(() => loading = true);
@@ -79,15 +80,18 @@ class _PhoneNumberState extends State<PhoneNumber> {
               disableLengthCheck: true,
               initialCountryCode: 'US',
               onChanged: (phone) {
-                print(phone.completeNumber);
+                setState(() {
+                  phoneNumber = phone.completeNumber;
+                });
               },
             ),
             const Spacer(),
             Container(
               margin: const EdgeInsets.all(15),
               child: ElevatedButton(
-                onPressed: () {
-                  sendCode();
+                onPressed: () async {
+                  print(phoneNumber);
+                  await sendCode();
                 },
                 style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
 
