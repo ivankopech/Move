@@ -51,6 +51,9 @@ dependencies:
   flutter_google_places_sdk: ^0.4.1
   image_picker: ^1.1.2
   intl_phone_field: ^3.2.0
+  firebase_auth: ^5.5.2
+  firebase_core: ^3.13.0
+  flutter_credit_card: ^4.1.0
 
 dev_dependencies:
   flutter_test:
