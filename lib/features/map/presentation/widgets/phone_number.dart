@@ -1,5 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:move/features/map/presentation/screens/screens.dart';
 
 class PhoneNumber extends StatefulWidget {
   const PhoneNumber({super.key});
@@ -9,6 +13,39 @@ class PhoneNumber extends StatefulWidget {
 }
 
 class _PhoneNumberState extends State<PhoneNumber> {
+  String? phoneNumber;
+  bool loading = false;
+
+  Future<void> sendCode() async {
+    if (phoneNumber == null) return;
+
+    setState(() => loading = true);
+
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) {},
+        verificationFailed: (FirebaseAuthException e) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          print('enviado');
+          context.pushNamed(CodeVerificationScreen.name, extra: verificationId);
+        },
+
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al enviar el código')));
+    } finally {
+      setState(() => loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -49,7 +86,9 @@ class _PhoneNumberState extends State<PhoneNumber> {
             Container(
               margin: const EdgeInsets.all(15),
               child: ElevatedButton(
-                onPressed: () async {},
+                onPressed: () {
+                  sendCode();
+                },
                 style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
 
                 child: Ink(
