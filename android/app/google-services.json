@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "154276388989",
+    "project_id": "move-948fb",
+    "storage_bucket": "move-948fb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:154276388989:android:cb66aff518e723db6a9114",
+        "android_client_info": {
+          "package_name": "com.softing.move"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMEd1TRxIymd2XpU-SpH_Js3P9SuMKXiw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
