@@ -1,31 +1,83 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
+import 'package:mime/mime.dart';
+import 'package:move/features/map/presentation/providers/providers.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../screens/phone_number.dart';
 
-class ItemInformation extends StatefulWidget {
+class ItemInformation extends ConsumerStatefulWidget {
   const ItemInformation({super.key});
 
   @override
-  State<ItemInformation> createState() => _ItemInformationState();
+  ConsumerState<ItemInformation> createState() => _ItemInformationState();
 }
 
-class _ItemInformationState extends State<ItemInformation> {
+class _ItemInformationState extends ConsumerState<ItemInformation> {
   TextEditingController controller = TextEditingController();
   final List<XFile> images = [];
   final ImagePicker picker = ImagePicker();
 
-  Future<void> pickImage(ImageSource source) async {
+  Future<Map<String, dynamic>> pickImage(ImageSource source) async {
     final XFile? image = await picker.pickImage(source: source);
     if (image != null) {
       setState(() {
         images.add(image);
       });
+      // Cargar la imagen seleccionada
+      File originalImage = File(image.path);
+      List<int> bytes = await originalImage.readAsBytes();
+
+      // Convertir la imagen a PNG usando el paquete 'image'
+      img.Image? decodedImage = img.decodeImage(Uint8List.fromList(bytes));
+      if (decodedImage != null) {
+        // Convertir la imagen a PNG
+        List<int> pngBytes = img.encodePng(decodedImage);
+
+        // Obtener el directorio de almacenamiento
+        Directory appDocDir = await getApplicationDocumentsDirectory();
+        String filePath =
+            '${appDocDir.path}/${DateTime.now().millisecondsSinceEpoch}.png';
+        File file = File(filePath);
+
+        // Guardar la imagen como un archivo PNG
+        await file.writeAsBytes(pngBytes);
+
+        String? fileName = file.uri.pathSegments.last;
+
+        // Obtener MIME type
+        String? mimeType = lookupMimeType(file.path);
+
+        // Convertir los bytes PNG a Base64
+        String base64Data = base64Encode(pngBytes);
+
+        print(fileName);
+        print(mimeType);
+        print(base64Data);
+        // Retornar el nombre del archivo, MIME type y los datos en Base64
+        ref.read(imagesProvider.notifier).setName(fileName);
+        ref.read(imagesProvider.notifier).setMimeType(mimeType!);
+        ref.read(imagesProvider.notifier).setData(base64Data);
+      }
     }
+    return {};
   }
+
+  // Future<void> pickImage(ImageSource source) async {
+  //   final XFile? image = await picker.pickImage(source: source);
+  //   if (image != null) {
+  //     setState(() {
+  //       images.add(image);
+  //     });
+  //   }
+  // }
 
   void showImageSourceDialog() {
     showModalBottomSheet(
@@ -204,6 +256,9 @@ class _ItemInformationState extends State<ItemInformation> {
               margin: const EdgeInsets.only(left: 15, right: 15),
               child: ElevatedButton(
                 onPressed: () async {
+                  ref
+                      .read(detailsProvider.notifier)
+                      .setDescription(controller.text);
                   await context.push<Map<String, String>>(
                     PhoneNumberScreen.path,
                   );
