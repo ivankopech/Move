@@ -14,6 +14,6 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
-    return PaymentWidget();
+    return SquarePaymentWidget();
   }
 }
