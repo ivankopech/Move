@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:move/config/observers/logging_route_observer.dart';
+import '../../features/auth/presentation/routes/auth_routes.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/home/presentation/routes/home_routes.dart';
+
 import 'package:move/features/map/presentation/screens/screens.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: MapInputScreen.path,
+    initialLocation: LoginScreen.path,
     observers: [LoggingRouteObserver()],
     routes: [
       GoRoute(
@@ -49,6 +53,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: PaymentScreen.name,
         builder: (context, state) => const PaymentScreen(),
       ),
+      ...AuthRoutes.get(),
+      ...HomeRoutes.get(),
     ],
   );
 });
