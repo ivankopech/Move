@@ -1,11 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_google_places_sdk/flutter_google_places_sdk.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'dart:math' show asin, atan2, cos, pi, sin, sqrt;
+
+import 'package:move/features/map/data/models/request_info.dart';
+import 'package:move/features/map/presentation/providers/providers.dart';
 
 import './custom_textfield.dart';
 
-class AddressInput extends StatefulWidget {
+class AddressInput extends ConsumerStatefulWidget {
   final bool isOrigin;
   final TextEditingController controller;
   final Function(String) onSelected;
@@ -20,10 +29,10 @@ class AddressInput extends StatefulWidget {
   });
 
   @override
-  State<AddressInput> createState() => _AddressInputState();
+  ConsumerState<AddressInput> createState() => _AddressInputState();
 }
 
-class _AddressInputState extends State<AddressInput> {
+class _AddressInputState extends ConsumerState<AddressInput> {
   late FocusNode originFocusNode;
   late FocusNode destinationFocusNode;
   List<String> suggestions = [];
@@ -35,6 +44,8 @@ class _AddressInputState extends State<AddressInput> {
   late TextEditingController originController;
   late TextEditingController destinationController;
   late FlutterGooglePlacesSdk places;
+  LatLng? originLatLng;
+  LatLng? destinationLatLng;
 
   @override
   void initState() {
@@ -131,6 +142,19 @@ class _AddressInputState extends State<AddressInput> {
 
     final address = details.place?.address ?? prediction.primaryText;
 
+    //parse address and latlng
+    final fullAddressModel = await buildFullAddressModel(
+      address,
+      ref,
+      isOrigin,
+    );
+
+    if (isOrigin) {
+      ref.read(originAddressProvider.notifier).state = fullAddressModel;
+    } else {
+      ref.read(destinationAddressProvider.notifier).state = fullAddressModel;
+    }
+
     setState(() {
       if (isOrigin) {
         originController.text = address;
@@ -158,6 +182,134 @@ class _AddressInputState extends State<AddressInput> {
         });
       }
     });
+  }
+
+  Future<AddressModel> buildFullAddressModel(
+    String fullAddress,
+    WidgetRef ref,
+    bool isOrigin,
+  ) async {
+    final parts = fullAddress.split(',').map((e) => e.trim()).toList();
+
+    if (parts.length < 4) {
+      throw Exception('Formato de dirección no válido');
+    }
+
+    String street = '';
+    String number = '';
+    String postalCode = '';
+    String city = '';
+    String state = '';
+    String country = '';
+    double? lat;
+    double? lng;
+
+    double? distance;
+
+    if (parts[0].contains("PRF")) {
+      final streetAndNumber = parts[1].split(' ');
+      number = streetAndNumber.removeLast();
+      street = streetAndNumber.join(' ');
+      postalCode = parts[2].split(' ')[0];
+      city = parts[2].substring(postalCode.length).trim();
+      state = parts[3];
+      country = parts[4];
+    } else {
+      final streetAndNumber = parts[0].split(' ');
+      number = streetAndNumber.removeLast();
+      street = streetAndNumber.join(' ');
+      postalCode = parts[1].split(' ')[0];
+      city = parts[1].substring(postalCode.length).trim();
+      state = parts[2];
+      country = parts[3];
+    }
+
+    final addressString =
+        '$street $number, $postalCode $city, $state, $country';
+
+    try {
+      final locations = await locationFromAddress(addressString);
+      if (locations.isNotEmpty) {
+        lat = locations.first.latitude;
+        lng = locations.first.longitude;
+        if (isOrigin) {
+          setState(() {
+            originLatLng = LatLng(lat: lat!, lng: lng!);
+          });
+        } else {
+          setState(() {
+            destinationLatLng = LatLng(lat: lat!, lng: lng!);
+          });
+        }
+      }
+    } catch (e) {
+      print('Error getting coordinates: $e');
+    }
+
+    if (originLatLng != null && destinationLatLng != null) {
+      final double? rawDistance = await getDistance(
+        originLatLng!.lat,
+        originLatLng!.lng,
+        destinationLatLng!.lat,
+        destinationLatLng!.lng,
+      );
+
+      if (rawDistance != null) {
+        print('la distancia es de: $rawDistance');
+        ref.read(distanceProvider.notifier).state = Distance(
+          distance: rawDistance,
+        );
+      } else {
+        print('error');
+      }
+    }
+
+    return AddressModel(
+      street: street,
+      number: number,
+      postalCode: postalCode,
+      city: city,
+      state: state,
+      country: country,
+      latitude: lat?.toString() ?? '',
+      longitude: lng?.toString() ?? '',
+    );
+  }
+
+  Future<double?> getDistance(
+    double originLat,
+    double originLng,
+    double destLat,
+    double destLng,
+  ) async {
+    final url =
+        Uri.https('maps.googleapis.com', '/maps/api/distancematrix/json', {
+          'origins': '$originLat, $originLng',
+          'destinations': '$destLat,$destLng',
+          'key': apiKey,
+        });
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final distanceInMeters =
+            data['rows'][0]['elements'][0]['distance']['value'];
+
+        // Convierte la distancia de metros a kilómetros (si es necesario)
+        final distanceInKm = distanceInMeters / 1000.0;
+
+        final truncatedDistance = (distanceInKm * 10).truncateToDouble() / 10;
+        //ref.read(distanceProvider.notifier).state = truncatedDistance;
+        return truncatedDistance;
+      } else {
+        throw Exception('Error al obtener la distancia');
+      }
+    } catch (e) {
+      print('Error: $e');
+      return null;
+    }
   }
 
   @override
