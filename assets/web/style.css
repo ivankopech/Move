@@ -1,0 +1,18 @@
+body {
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+#card-container {
+  margin: 20px 0;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#message {
+  margin-top: 10px;
+}
