@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:move/features/map/presentation/providers/providers.dart';
 
 import '../screens/item_information.dart';
 
-class ArrivalTime extends StatefulWidget {
+class ArrivalTime extends ConsumerStatefulWidget {
   const ArrivalTime({super.key});
 
   @override
-  State<ArrivalTime> createState() => _ArrivalTimeState();
+  ConsumerState<ArrivalTime> createState() => _ArrivalTimeState();
 }
 
-class _ArrivalTimeState extends State<ArrivalTime> {
+class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
   int? selectedIndex;
   Map<String, dynamic>? selectedVehicle;
   String? title;
@@ -328,10 +330,25 @@ class _ArrivalTimeState extends State<ArrivalTime> {
           SizedBox(height: 30),
           ElevatedButton(
             onPressed: () async {
-              final date = dateLabels[selectedDateIndex];
+              final rawDate = dateLabels[selectedDateIndex];
               final time = timeSlots[selectedTimeIndex];
-              final result = '$date | $time';
-              print('selected $result');
+              //final result = '$date | $time';
+
+              final date = getDateFromString(rawDate);
+              final updatedDate = '${date.day}/${date.month}/${date.year}';
+
+              final formattedTime = cleanTime(time);
+              final dateISO = parseToISO8601(updatedDate);
+
+              final combinedDate = combineDateWithHour(dateISO, formattedTime);
+
+              print('fecha: $dateISO');
+              print('hora: $formattedTime');
+
+              ref.read(detailsProvider.notifier).setStartDate(combinedDate);
+              ref.read(detailsProvider.notifier).setStartTime(formattedTime);
+
+              //print('selected $result');
               await context.push<Map<String, String>>(
                 ItemInformationScreen.path,
               );
@@ -360,6 +377,77 @@ class _ArrivalTimeState extends State<ArrivalTime> {
         ],
       ),
     );
+  }
+
+  DateTime getDateFromString(String dateString) {
+    final now = DateTime.now();
+
+    switch (dateString.toLowerCase()) {
+      case 'today':
+        return now;
+      case 'tomorrow':
+        return now.add(Duration(days: 1));
+      default:
+        // En caso de que el valor sea un día de la semana: "Wednesday", "Thursday", etc.
+        final weekdays = {
+          'monday': DateTime.monday,
+          'tuesday': DateTime.tuesday,
+          'wednesday': DateTime.wednesday,
+          'thursday': DateTime.thursday,
+          'friday': DateTime.friday,
+          'saturday': DateTime.saturday,
+          'sunday': DateTime.sunday,
+        };
+
+        final targetWeekday = weekdays[dateString.toLowerCase()];
+        if (targetWeekday == null) return now;
+
+        int daysToAdd = (targetWeekday - now.weekday) % 7;
+        daysToAdd = daysToAdd == 0 ? 7 : daysToAdd;
+
+        return now.add(Duration(days: daysToAdd));
+    }
+  }
+
+  String cleanTime(String timeString) {
+    final match = RegExp(r'\d+').firstMatch(timeString);
+    return match != null ? match.group(0)! : '';
+  }
+
+  String parseToISO8601(String date) {
+    if (date.isEmpty) {
+      return 'Invalid or empty date'; // Handle empty input gracefully
+    }
+
+    List<String> parts = date.split('/');
+    if (parts.length != 3) {
+      throw const FormatException('Invalid date format. Expected dd/mm/yyyy');
+    }
+
+    int day = int.parse(parts[0]);
+    int month = int.parse(parts[1]);
+    int year = int.parse(parts[2]);
+
+    DateTime dateTime = DateTime(year, month, day);
+    return dateTime.toUtc().toIso8601String(); // Convert to ISO 8601 format
+  }
+
+  String combineDateWithHour(String isoDate, String hour) {
+    if (isoDate.isEmpty || hour.isEmpty) return 'Invalid input';
+
+    DateTime date = DateTime.parse(isoDate);
+    int parsedHour = int.tryParse(hour) ?? 0;
+
+    DateTime updatedDate = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+      parsedHour,
+      0,
+      0,
+    );
+
+    return updatedDate.toIso8601String(); // ya incluye la Z (UTC)
   }
 
   @override
