@@ -40,7 +40,7 @@ class GetRequestsModel {
   int? tamanioCarga;
   String? horaViaje;
   String? estado;
-  String? origin;
+  int? origin;
   int? cantidadTramos;
   String? uniqueId;
 
