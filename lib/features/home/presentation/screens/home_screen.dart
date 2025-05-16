@@ -4,6 +4,7 @@ import '../../../auth/presentation/providers/login_state_notifier_provider.dart'
 import '../providers/user_state_notifier_provider.dart';
 import '../widgets/home_content.dart';
 import '../../../map/presentation/screens/map_input.dart';
+import '../../../requests/presentation/screens/get_requests_screen.dart';
 import '../../../../utils/utils.dart';
 
 import '../widgets/app_drawer.dart';
@@ -23,11 +24,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Widget> _screens = const [
     HomeContent(),
     MapInputScreen(),
+    GetRequestsScreen(),
     // TakenScreen(),
     // ProposedScreen(),
   ];
 
-  final List<String> _titles = const ['Home', 'New Request'];
+  final List<String> _titles = const ['Home', 'New Request', 'MyRequests'];
 
   @override
   void initState() {
