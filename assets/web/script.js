@@ -13,9 +13,11 @@ async function main() {
 
   const button = document.getElementById("pay-button");
   const message = document.getElementById("message");
+  const spinner = document.getElementById("spinner");
 
   button.addEventListener("click", async () => {
-    console.log("aca");
+    button.classList.add("hidden");
+    spinner.classList.remove("hidden");
     try {
       const result = await card.tokenize();
       if (result.status === "OK") {
@@ -28,6 +30,9 @@ async function main() {
       }
     } catch (err) {
       message.textContent = `❗ Excepción: ${err.message}`;
+    } finally {
+      button.classList.remove("hidden");
+      spinner.classList.add("hidden");
     }
   });
 }
