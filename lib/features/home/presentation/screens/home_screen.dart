@@ -25,11 +25,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     HomeContent(),
     MapInputScreen(),
     GetRequestsScreen(),
-    // TakenScreen(),
-    // ProposedScreen(),
   ];
 
-  final List<String> _titles = const ['Home', 'New Request', 'MyRequests'];
+  final List<String> _titles = const ['Home', 'New Request', 'My Requests'];
 
   @override
   void initState() {
