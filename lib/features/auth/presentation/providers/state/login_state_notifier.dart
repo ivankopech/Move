@@ -10,10 +10,10 @@ class LoginStateNotifier extends StateNotifier<AsyncValue<AuthResponseModel?>> {
 
   late AuthResponseModel? authResponseModel;
 
-  Future<void> login(String user, String password) async {
+  Future<void> login(String number, String code) async {
     try {
       state = AsyncValue.loading();
-      final result = await loginUseCase(user, password);
+      final result = await loginUseCase(number, code);
 
       state = result.fold(
         (error) => AsyncValue.error(error, StackTrace.current),

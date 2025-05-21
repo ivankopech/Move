@@ -15,12 +15,12 @@ class AuthRepositoryInterfaceImplementation extends AuthRepositoryInterface {
   }) : _secureStorage = secureStorage ?? SecureStorageManager();
 
   @override
-  Future<Result<AuthResponseModel?>> login(String user, String password) async {
+  Future<Result<AuthResponseModel?>> login(String number, String code) async {
     try {
-      final body = {"userNameOrEmailAddress": user, "password": password};
+      final body = {"phoneNumber": number, "otp": code};
 
       final response = await _apiClient.postData(
-        'TokenAuth/Authenticate',
+        'TokenAuth/ValidateOtp',
         body,
         (json) => AuthResponseModel.fromJson(json),
       );

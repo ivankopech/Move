@@ -9,9 +9,9 @@ class LoginUseCase {
   LoginUseCase({required this.authRepositoryInterface});
 
   Future<Either<ApiException, AuthResponseModel?>> call(
-    String user,
-    String password,
+    String number,
+    String code,
   ) async {
-    return authRepositoryInterface.login(user, password);
+    return authRepositoryInterface.login(number, code);
   }
 }
