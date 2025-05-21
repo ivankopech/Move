@@ -35,7 +35,7 @@ class HomeContent extends ConsumerWidget {
             Expanded(
               child: Align(
                 alignment: Alignment.bottomCenter,
-                child: appImage(AppAssets.loginJheet),
+                child: appImage(AppAssets.loginJeet),
               ),
             ),
           ],
