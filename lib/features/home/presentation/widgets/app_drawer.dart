@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../screens/home_screen.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../map/presentation/screens/map_input.dart';
+import '../../../requests/presentation/screens/get_requests_screen.dart';
 
 class AppDrawer extends StatelessWidget {
-  final void Function(int) onItemSelected;
-
-  const AppDrawer({super.key, required this.onItemSelected});
+  const AppDrawer();
 
   @override
   Widget build(BuildContext context) {
@@ -13,32 +14,33 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           AppBar(
-            title: const Text('Menú de opciones'),
+            title: const Text('Options'),
             automaticallyImplyLeading: false,
             backgroundColor: Colors.white,
           ),
           ListTile(
             leading: const Icon(Icons.home),
             title: const Text('Home'),
-            onTap: () => onItemSelected(0),
+            onTap: () {
+              context.pushReplacementNamed(HomeScreen.name);
+            },
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.file_present),
             title: const Text('New Request'),
-            onTap: () => onItemSelected(1),
+            onTap: () {
+              context.go(MapInputScreen.path);
+            },
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.file_present),
-            title: const Text('My Requests'),
-            onTap: () => onItemSelected(2),
+            leading: const Icon(Icons.question_mark_outlined),
+            title: const Text('Untaken Requests'),
+            onTap: () {
+              context.go(GetRequestsScreen.path);
+            },
           ),
-          // ListTile(
-          //   leading: const Icon(Icons.add_circle_outline_rounded),
-          //   title: const Text('Propuestos'),
-          //   onTap: () => onItemSelected(2),
-          // ),
           const Spacer(),
           ListTile(
             leading: const Icon(Icons.logout),
