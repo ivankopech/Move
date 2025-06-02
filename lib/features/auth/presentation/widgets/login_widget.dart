@@ -89,7 +89,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Inicia sesión para continuar',
+                    'Log in to continue',
                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 24),
@@ -136,6 +136,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                             ),
                             const SizedBox(height: 16),
                           ],
+                          SizedBox(height: 30),
                           SizedBox(
                             width: double.infinity,
                             child:
@@ -149,18 +150,38 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                                               ? handleLogin
                                               : handleRequest,
                                       style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 14,
-                                        ),
-                                        shape: RoundedRectangleBorder(
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      child: Ink(
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Colors.indigo,
+                                              Colors.purple,
+                                            ],
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                          ),
                                           borderRadius: BorderRadius.circular(
-                                            12,
+                                            30,
                                           ),
                                         ),
-                                      ),
-                                      child: Text(
-                                        showCodeField ? 'Log in' : 'Send code',
-                                        style: const TextStyle(fontSize: 16),
+                                        child: Container(
+                                          constraints: const BoxConstraints(
+                                            minWidth: 100,
+                                            minHeight: 50,
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            showCodeField
+                                                ? 'Log in'
+                                                : 'Send code',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                           ),
