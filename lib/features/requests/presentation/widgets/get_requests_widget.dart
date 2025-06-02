@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../common/widgets/loader_widget.dart';
 import '../providers/get_requests_state_notifier_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import '../../../map/presentation/screens/map_input.dart';
 
 class GetRequestsWidget extends ConsumerStatefulWidget {
   const GetRequestsWidget({super.key});
@@ -29,6 +30,14 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
     return requestState.when(
       data: (requests) {
         return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
+                context.go(MapInputScreen.path);
+              },
+              icon: Icon(Icons.arrow_back_outlined),
+            ),
+          ),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
