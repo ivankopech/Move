@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../common/widgets/loader_widget.dart';
-import '../../../../config/api_exception.dart';
 import '../../data/models/auth_response_model.dart';
 import '../providers/login_state_notifier_provider.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../../utils/utils.dart';
 import '../../../verification_code/providers/send_code_state_notifier_provider.dart';
+import '../../../map/presentation/screens/map_input.dart';
 
 class LoginWidget extends ConsumerStatefulWidget {
   const LoginWidget({super.key});
@@ -68,7 +66,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
       next,
     ) {
       if (next is AsyncData && next.value != null) {
-        context.go(HomeScreen.path);
+        context.go(MapInputScreen.path);
       }
       if (next is AsyncError) {}
     });
@@ -104,7 +102,6 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      //border: Border.all(color: appColors.primaryColor),
                     ),
                     child: SingleChildScrollView(
                       child: Column(
@@ -171,72 +168,6 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                       ),
                     ),
                   ),
-
-                  // Container(
-                  //   padding: const EdgeInsets.all(20),
-                  //   decoration: BoxDecoration(
-                  //     color: const Color(0xFFFDF3FA),
-                  //     borderRadius: BorderRadius.circular(20),
-                  //     border: Border.all(
-                  //       color: appColors.primaryColor.withOpacity(0.3),
-                  //     ),
-                  //   ),
-                  //   child: FormBuilder(
-                  //     key: formKey,
-                  //     child: Column(
-                  //       children: <Widget>[
-                  //         FormBuilderTextField(
-                  //           name: 'email',
-                  //           decoration: AppInputStyles.inputDecoration(
-                  //             label: 'Email',
-                  //             hintText: 'ejemplo@correo.com',
-                  //             prefixIcon: const Icon(Icons.email),
-                  //           ),
-                  //           textInputAction: TextInputAction.next,
-                  //           validator: FormBuilderValidators.compose([
-                  //             FormBuilderValidators.required(),
-                  //             // FormBuilderValidators.email(),
-                  //           ]),
-                  //         ),
-                  //         const SizedBox(height: 16),
-                  //         FormBuilderTextField(
-                  //           name: 'password',
-                  //           obscureText: true,
-                  //           decoration: AppInputStyles.inputDecoration(
-                  //             label: 'Password',
-                  //             prefixIcon: const Icon(Icons.lock),
-                  //           ),
-                  //           validator: FormBuilderValidators.required(),
-                  //         ),
-                  //         const SizedBox(height: 24),
-                  //         authState is AsyncLoading
-                  //             ? const LoaderWidget()
-                  //             : SizedBox(
-                  //               width: double.infinity,
-                  //               child: ElevatedButton(
-                  //                 style: AppButtonStyles.primaryButton,
-                  //                 onPressed: () async {
-                  //                   await handleLogin();
-                  //                   // if (formKey.currentState!
-                  //                   //     .saveAndValidate()) {
-                  //                   //   final formData =
-                  //                   //       formKey.currentState!.value;
-                  //                   //   final email = formData['email'];
-                  //                   //   final password = formData['password'];
-                  //                   //   await ref
-                  //                   //       .read(
-                  //                   //         loginStateNotifierProvider.notifier,
-                  //                   //       )
-                  //                   //       .login(email, password);
-                  //                   // }
-                  //                 },
-                  //                 child: const Text("Login"),
-                  //               ),
-                  //             ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
                 ],
               ),
             ),
