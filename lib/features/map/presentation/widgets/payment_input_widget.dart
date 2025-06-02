@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:move/features/map/data/models/create_request.dart';
 import 'package:move/features/map/presentation/providers/providers.dart';
 import 'dart:convert';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/create_request_state_notifier_provider.dart';
+import '../../../map/presentation/screens/map_input.dart';
+import '../../../home/presentation/screens/home_screen.dart';
 
 class SquarePaymentWidget extends ConsumerStatefulWidget {
   const SquarePaymentWidget({super.key});
@@ -42,7 +45,7 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
             NavigationDelegate(
               onNavigationRequest: (request) {
                 if (request.url == 'success://home') {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  //Navigator.of(context).popUntil((route) => route.isFirst);
                   return NavigationDecision.prevent;
                 }
                 return NavigationDecision.navigate;
@@ -164,10 +167,9 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
     """);
       return false;
     } finally {
-      await controller.runJavaScript("""
-      document.getElementById("pay-button").classList.remove("hidden");
-      document.getElementById("spinner").classList.add("hidden");
-    """);
+      await controller.runJavaScript(
+        """document.getElementById("spinner").classList.add("hidden");""",
+      );
     }
   }
 
@@ -175,8 +177,44 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
   Widget build(BuildContext context) {
     final requestsState = ref.watch(createRequestStateNotifierProvider);
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: Text('Insert a payment method')),
-      body: WebViewWidget(controller: controller),
+      body: Column(
+        children: [
+          Expanded(child: WebViewWidget(controller: controller)),
+          if (token.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 15, right: 15, bottom: 60),
+              child: ElevatedButton(
+                onPressed: () {
+                  context.go(HomeScreen.path);
+                },
+                style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.indigo, Colors.purple],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 100,
+                      minHeight: 50,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      "Go back",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
