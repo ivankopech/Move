@@ -18,8 +18,9 @@ async function main() {
   button.addEventListener("click", async () => {
     button.classList.add("hidden");
     spinner.classList.remove("hidden");
+    let result;
     try {
-      const result = await card.tokenize();
+      result = await card.tokenize();
       if (result.status === "OK") {
         message.textContent = "✅ Token generado con éxito";
         window.SquareChannel?.postMessage(
@@ -31,8 +32,10 @@ async function main() {
     } catch (err) {
       message.textContent = `❗ Excepción: ${err.message}`;
     } finally {
-      button.classList.remove("hidden");
       spinner.classList.add("hidden");
+      if (result?.status !== "OK") {
+        button.classList.remove("hidden");
+      }
     }
   });
 }
