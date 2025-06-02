@@ -19,16 +19,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = const [
-    HomeContent(),
-    MapInputScreen(),
-    GetRequestsScreen(),
-  ];
-
-  final List<String> _titles = const ['Home', 'New Request', 'My Requests'];
-
   @override
   void initState() {
     super.initState();
@@ -49,10 +39,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _titles[_selectedIndex],
-          style: appTextStyles.subhead.copyWith(color: Colors.white),
-        ),
         leading: Builder(
           builder:
               (context) => IconButton(
@@ -62,15 +48,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         backgroundColor: appColors.primaryColor,
       ),
-      drawer: AppDrawer(
-        onItemSelected: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          Navigator.pop(context);
-        },
-      ),
-      body: _screens[_selectedIndex],
+      drawer: AppDrawer(),
+      body: Center(child: Text('data')),
     );
   }
 }
