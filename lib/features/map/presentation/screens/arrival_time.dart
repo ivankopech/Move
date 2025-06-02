@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../widgets/arrival_time.dart';
 
 class ArrivalTimeScreen extends StatefulWidget {
-  static const path = '/arrival-time-input';
-  static const name = 'arrival-time-input';
+  static const path = '/arrival-time';
+  static const name = 'arrival-time';
 
   const ArrivalTimeScreen({super.key});
 
