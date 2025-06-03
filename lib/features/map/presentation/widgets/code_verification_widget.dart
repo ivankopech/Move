@@ -69,15 +69,39 @@ class _CodeVerificationWidgetState extends State<CodeVerificationWidget> {
                 border: OutlineInputBorder(),
               ),
             ),
-            SizedBox(height: 20),
+            const Spacer(),
             loading
                 ? CircularProgressIndicator()
-                : ElevatedButton(
-                  onPressed: () async {
-                    await verifyCode();
-                    //context.pushNamed(PaymentScreen.name);
-                  },
-                  child: Text('Verificar'),
+                : Container(
+                  margin: const EdgeInsets.all(15),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      await verifyCode();
+                    },
+                    style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
+
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Colors.indigo, Colors.purple],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Container(
+                        constraints: const BoxConstraints(
+                          minWidth: 100,
+                          minHeight: 50,
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "Verify code",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
           ],
         ),
