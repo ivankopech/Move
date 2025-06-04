@@ -16,14 +16,12 @@ import './custom_textfield.dart';
 
 class AddressInput extends ConsumerStatefulWidget {
   final bool isOrigin;
-  final TextEditingController controller;
   final Function(String) onSelected;
   final String? otherAddress;
 
   const AddressInput({
     super.key,
     required this.isOrigin,
-    required this.controller,
     required this.onSelected,
     this.otherAddress,
   });
@@ -158,6 +156,7 @@ class _AddressInputState extends ConsumerState<AddressInput> {
     setState(() {
       if (isOrigin) {
         originController.text = address;
+        originController.selection = TextSelection.collapsed(offset: 0);
         originSuggestions.clear();
       } else {
         destinationController.text = address;
@@ -322,7 +321,7 @@ class _AddressInputState extends ConsumerState<AddressInput> {
           child: Column(
             children: [
               CustomTextField(
-                controller: widget.controller,
+                controller: originController,
                 focusNode: originFocusNode,
                 icon: const Icon(Icons.arrow_upward_outlined),
                 hintText: 'Enter origin location...',

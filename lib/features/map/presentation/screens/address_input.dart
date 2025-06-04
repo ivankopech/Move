@@ -49,7 +49,6 @@ class _AddressInputScreenState extends State<AddressInputScreen> {
   Widget build(BuildContext context) {
     return AddressInput(
       isOrigin: true,
-      controller: originAddressController!,
       onSelected: (value) => handleSelected(value, true),
       otherAddress: destinationAddressController?.text,
     );
