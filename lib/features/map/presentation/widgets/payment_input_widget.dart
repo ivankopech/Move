@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/create_request_state_notifier_provider.dart';
-import '../../../map/presentation/screens/map_input.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 
 class SquarePaymentWidget extends ConsumerStatefulWidget {
@@ -157,7 +156,7 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
           );
 
       await controller.runJavaScript("""
-        document.getElementById("message").textContent = "✅ Solicitud creada con éxito";
+        document.getElementById("message").textContent = "✅ Request created successfully";
         setTimeout(() => window.location.href = "success://home", 1000);
       """);
       return true;
