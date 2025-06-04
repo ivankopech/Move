@@ -37,9 +37,9 @@ class _CodeVerificationWidgetState extends State<CodeVerificationWidget> {
         credential,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('¡Teléfono verificado correctamente!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Phone number verified!')));
       await context.pushNamed(PaymentScreen.name);
       //navigate to other screen
     } on FirebaseAuthException catch (e) {
@@ -65,8 +65,10 @@ class _CodeVerificationWidgetState extends State<CodeVerificationWidget> {
               controller: codeController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Código SMS',
-                border: OutlineInputBorder(),
+                hintText: 'Código SMS',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
             ),
             const Spacer(),
