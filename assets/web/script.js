@@ -22,7 +22,7 @@ async function main() {
     try {
       result = await card.tokenize();
       if (result.status === "OK") {
-        message.textContent = "✅ Token generado con éxito";
+        message.textContent = "✅ Token generated successfully";
         window.SquareChannel?.postMessage(
           JSON.stringify({ token: result.token })
         );
