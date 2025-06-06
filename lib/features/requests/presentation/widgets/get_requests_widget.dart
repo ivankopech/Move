@@ -6,6 +6,7 @@ import '../../../../common/widgets/loader_widget.dart';
 import '../providers/get_requests_state_notifier_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../../map/presentation/screens/map_input.dart';
+import './row_details.dart';
 
 class GetRequestsWidget extends ConsumerStatefulWidget {
   const GetRequestsWidget({super.key});
@@ -49,6 +50,7 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
                   itemBuilder: (context, index) {
                     final requestIndex = requests[index];
                     final date = requestIndex!.fechaViaje;
+                    final id = requestIndex.id;
                     DateTime dateTime = DateTime.parse(date.toString());
                     String requestDate = DateFormat(
                       'dd/MM/yyyy',
@@ -66,7 +68,58 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
                               94,
                             ),
                             icon: Icons.info_outline_rounded,
-                            onPressed: (ctx) async {},
+                            onPressed: (ctx) {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            'Request details',
+                                            style: TextStyle(fontSize: 18),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(height: 10),
+                                          buildDetailRow(
+                                            'ID',
+                                            requestIndex.id.toString(),
+                                          ),
+                                          buildDetailRow(
+                                            'Date',
+                                            DateFormat('MM/dd/yyy').format(
+                                              DateTime.parse(
+                                                requestIndex.fechaViaje
+                                                    .toString(),
+                                              ),
+                                            ),
+                                          ),
+                                          buildDetailRow(
+                                            'Origin',
+                                            '${requestIndex.calleDesde} ${requestIndex.numeroDesde}',
+                                          ),
+                                          buildDetailRow(
+                                            'Destination',
+                                            '${requestIndex.calleHasta} ${requestIndex.numeroHasta}',
+                                          ),
+                                          buildDetailRow(
+                                            'Status',
+                                            '${requestIndex.estado}',
+                                          ),
+                                          const SizedBox(height: 20),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ],
                       ),
