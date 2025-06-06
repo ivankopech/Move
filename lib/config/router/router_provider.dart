@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:move/config/observers/logging_route_observer.dart';
-import 'package:move/features/home/presentation/screens/home_screen.dart';
 import 'package:move/features/requests/presentation/screens/get_requests_screen.dart';
-import 'package:move/features/requests/presentation/screens/request_details_screen.dart';
 import '../../features/auth/presentation/routes/auth_routes.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/routes/home_routes.dart';
