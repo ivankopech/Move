@@ -31,9 +31,9 @@ class InputAddressSheetState extends State<InputAddressSheet> {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.2,
-      minChildSize: 0.1,
-      maxChildSize: 0.3,
+      initialChildSize: 0.25,
+      minChildSize: 0.2,
+      maxChildSize: 0.25,
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
