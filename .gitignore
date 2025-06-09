@@ -47,6 +47,8 @@ unlinked.ds
 unlinked_spec.ds
 ios/Secrets.swift
 ios/Secrets.xcconfig
+ios/Runner/Secrets.swift
+ios/Runner/Secrets.xcconfig
 
 # Symbolication related
 app.*.symbols
