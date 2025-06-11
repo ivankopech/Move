@@ -368,7 +368,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
                 constraints: const BoxConstraints(minWidth: 100, minHeight: 50),
                 alignment: Alignment.center,
                 child: const Text(
-                  "Continuar",
+                  "Continue",
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
