@@ -235,22 +235,22 @@ class _ItemInformationState extends ConsumerState<ItemInformation> {
               ),
             ),
 
-            const SizedBox(height: 15),
-            Container(
-              margin: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(10),
-              ),
+            // const SizedBox(height: 15),
+            // Container(
+            //   margin: const EdgeInsets.all(15),
+            //   decoration: BoxDecoration(
+            //     color: Colors.grey.shade100,
+            //     borderRadius: BorderRadius.circular(10),
+            //   ),
 
-              child: ListTile(
-                leading: const Icon(Icons.person_add_alt, color: Colors.purple),
-                title: const Text('Add additional contacts'),
-                subtitle: const Text('Share updates about your Lugg'),
+            //   child: ListTile(
+            //     leading: const Icon(Icons.person_add_alt, color: Colors.purple),
+            //     title: const Text('Add additional contacts'),
+            //     subtitle: const Text('Share updates about your Lugg'),
 
-                onTap: () {},
-              ),
-            ),
+            //     onTap: () {},
+            //   ),
+            // ),
             const SizedBox(height: 200),
             Container(
               margin: const EdgeInsets.only(left: 15, right: 15),
