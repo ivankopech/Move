@@ -16,29 +16,30 @@ class UserResponseModel {
   String? birthday;
   String? lastLoginTime;
   String? creationTime;
-  int? typeUser;
+  String? typeUser;
   List<String>? roleNames;
 
-  UserResponseModel(
-      {this.id,
-      this.userName,
-      this.name,
-      this.surname,
-      this.emailAddress,
-      this.isActive,
-      this.fullName,
-      this.denomination,
-      this.dni,
-      this.cuit,
-      this.streetName,
-      this.streetNumber,
-      this.floorNumber,
-      this.houseNumber,
-      this.birthday,
-      this.lastLoginTime,
-      this.creationTime,
-      this.typeUser,
-      this.roleNames});
+  UserResponseModel({
+    this.id,
+    this.userName,
+    this.name,
+    this.surname,
+    this.emailAddress,
+    this.isActive,
+    this.fullName,
+    this.denomination,
+    this.dni,
+    this.cuit,
+    this.streetName,
+    this.streetNumber,
+    this.floorNumber,
+    this.houseNumber,
+    this.birthday,
+    this.lastLoginTime,
+    this.creationTime,
+    this.typeUser,
+    this.roleNames,
+  });
 
   UserResponseModel.fromJson(Map<String, dynamic> json) {
     var result = json['result'];
