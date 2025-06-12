@@ -49,6 +49,7 @@ ios/Secrets.swift
 ios/Secrets.xcconfig
 ios/Runner/Secrets.swift
 ios/Runner/Secrets.xcconfig
+/assets/web/script.js
 
 # Symbolication related
 app.*.symbols
