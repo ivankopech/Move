@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:move/features/home/presentation/widgets/app_drawer.dart';
 import '../../../../common/widgets/loader_widget.dart';
 import '../providers/get_requests_state_notifier_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -39,6 +40,7 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
               icon: Icon(Icons.arrow_back_outlined),
             ),
           ),
+          drawer: AppDrawer(),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
