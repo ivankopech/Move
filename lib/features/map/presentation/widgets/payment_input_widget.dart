@@ -28,30 +28,43 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
   }
 
   void initializeWebPayment() async {
-    controller =
-        WebViewController()
-          ..setJavaScriptMode(JavaScriptMode.unrestricted)
-          ..addJavaScriptChannel(
-            'SquareChannel',
-            onMessageReceived: (message) async {
-              final data = jsonDecode(message.message);
-              token = data['token'];
-              print('el token es $token');
-              await sendRequest();
-            },
-          )
-          ..setNavigationDelegate(
-            NavigationDelegate(
-              onNavigationRequest: (request) {
-                if (request.url == 'success://home') {
-                  //Navigator.of(context).popUntil((route) => route.isFirst);
-                  return NavigationDecision.prevent;
-                }
-                return NavigationDecision.navigate;
+    try {
+      controller =
+          WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..addJavaScriptChannel(
+              'SquareChannel',
+              onMessageReceived: (message) async {
+                final data = jsonDecode(message.message);
+                token = data['token'];
+                print('el token es $token');
+                await sendRequest();
               },
-            ),
-          )
-          ..loadRequest(Uri.parse('https://move.softdev.ar/public/index.html'));
+            )
+            ..setNavigationDelegate(
+              NavigationDelegate(
+                onNavigationRequest: (request) {
+                  if (request.url == 'success://home') {
+                    //Navigator.of(context).popUntil((route) => route.isFirst);
+                    return NavigationDecision.prevent;
+                  }
+                  return NavigationDecision.navigate;
+                },
+              ),
+            )
+            ..loadRequest(
+              Uri.parse('https://move.softdev.ar/public/index.html'),
+            );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'An error ocurred while creating your request. Try again later',
+          ),
+        ),
+      );
+      return;
+    }
   }
 
   Future<bool> sendRequest() async {
