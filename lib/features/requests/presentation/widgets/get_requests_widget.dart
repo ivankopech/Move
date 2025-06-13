@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:move/features/home/presentation/widgets/app_drawer.dart';
 import '../../../../common/widgets/loader_widget.dart';
+import '../../../../common/widgets/generic_error_screen.dart';
 import '../providers/get_requests_state_notifier_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../../map/presentation/screens/map_input.dart';
@@ -23,6 +24,10 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
     Future.microtask(() {
       ref.read(getRequestsStateNotifierProvider.notifier).getRequests();
     });
+  }
+
+  void onRetry() {
+    ref.read(getRequestsStateNotifierProvider.notifier).getRequests();
   }
 
   @override
@@ -195,9 +200,7 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
           ),
         );
       },
-      error:
-          (error, stackTrace) =>
-              const Center(child: Text('Error loading requests')),
+      error: (error, stackTrace) => GenericErrorScreen(onRetry: onRetry),
       loading: () => const LoaderWidget(),
     );
   }
