@@ -1,5 +1,3 @@
-import 'package:move/features/map/data/models/create_request.dart';
-
 class AddressModel {
   final String street;
   final String number;
