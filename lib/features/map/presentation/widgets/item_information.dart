@@ -11,7 +11,7 @@ import 'package:mime/mime.dart';
 import 'package:move/features/map/presentation/providers/providers.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../screens/phone_number.dart';
+import '../screens/payment_input.dart';
 
 class ItemInformation extends ConsumerStatefulWidget {
   const ItemInformation({super.key});
@@ -157,7 +157,7 @@ class _ItemInformationState extends ConsumerState<ItemInformation> {
                   Expanded(
                     child: GestureDetector(
                       onTap: showImageSourceDialog,
-                      child: Container(
+                      child: SizedBox(
                         height: 120,
                         child: Center(
                           child: Column(
@@ -235,22 +235,6 @@ class _ItemInformationState extends ConsumerState<ItemInformation> {
               ),
             ),
 
-            // const SizedBox(height: 15),
-            // Container(
-            //   margin: const EdgeInsets.all(15),
-            //   decoration: BoxDecoration(
-            //     color: Colors.grey.shade100,
-            //     borderRadius: BorderRadius.circular(10),
-            //   ),
-
-            //   child: ListTile(
-            //     leading: const Icon(Icons.person_add_alt, color: Colors.purple),
-            //     title: const Text('Add additional contacts'),
-            //     subtitle: const Text('Share updates about your Lugg'),
-
-            //     onTap: () {},
-            //   ),
-            // ),
             const SizedBox(height: 200),
             Container(
               margin: const EdgeInsets.only(left: 15, right: 15),
@@ -259,9 +243,7 @@ class _ItemInformationState extends ConsumerState<ItemInformation> {
                   ref
                       .read(detailsProvider.notifier)
                       .setDescription(controller.text);
-                  await context.push<Map<String, String>>(
-                    PhoneNumberScreen.path,
-                  );
+                  await context.push<Map<String, String>>(PaymentScreen.path);
                 },
                 style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
 
