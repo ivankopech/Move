@@ -82,11 +82,11 @@ class CreateRequestModel {
     if (json['tramos'] != null) {
       tramos = <Tramos>[];
       json['tramos'].forEach((v) {
-        tramos!.add(new Tramos.fromJson(v));
+        tramos!.add(Tramos.fromJson(v));
       });
     }
     payment =
-        json['payment'] != null ? new Payment.fromJson(json['payment']) : null;
+        json['payment'] != null ? Payment.fromJson(json['payment']) : null;
     distance = json['distance'];
     tipPercent = json['tipPercent'];
     existingFrom = json['existingFrom'];
@@ -94,38 +94,38 @@ class CreateRequestModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['typeService'] = this.typeService;
-    data['aliasFrom'] = this.aliasFrom;
-    data['streetFrom'] = this.streetFrom;
-    data['cpFrom'] = this.cpFrom;
-    data['cityFrom'] = this.cityFrom;
-    data['numberFrom'] = this.numberFrom;
-    data['countryFrom'] = this.countryFrom;
-    data['florNummberFrom'] = this.florNummberFrom;
-    data['stateFrom'] = this.stateFrom;
-    data['descriptionFrom'] = this.descriptionFrom;
-    data['placeIdFrom'] = this.placeIdFrom;
-    data['latFrom'] = this.latFrom;
-    data['longFrom'] = this.longFrom;
-    data['longDirectionFrom'] = this.longDirectionFrom;
-    data['description'] = this.description;
-    data['startDate'] = this.startDate;
-    data['startTime'] = this.startTime;
-    data['details'] = this.details;
-    data['idVehicle'] = this.idVehicle;
-    data['cantPersons'] = this.cantPersons;
-    if (this.tramos != null) {
-      data['tramos'] = this.tramos!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['typeService'] = typeService;
+    data['aliasFrom'] = aliasFrom;
+    data['streetFrom'] = streetFrom;
+    data['cpFrom'] = cpFrom;
+    data['cityFrom'] = cityFrom;
+    data['numberFrom'] = numberFrom;
+    data['countryFrom'] = countryFrom;
+    data['florNummberFrom'] = florNummberFrom;
+    data['stateFrom'] = stateFrom;
+    data['descriptionFrom'] = descriptionFrom;
+    data['placeIdFrom'] = placeIdFrom;
+    data['latFrom'] = latFrom;
+    data['longFrom'] = longFrom;
+    data['longDirectionFrom'] = longDirectionFrom;
+    data['description'] = description;
+    data['startDate'] = startDate;
+    data['startTime'] = startTime;
+    data['details'] = details;
+    data['idVehicle'] = idVehicle;
+    data['cantPersons'] = cantPersons;
+    if (tramos != null) {
+      data['tramos'] = tramos!.map((v) => v.toJson()).toList();
     }
-    if (this.payment != null) {
-      data['payment'] = this.payment!.toJson();
+    if (payment != null) {
+      data['payment'] = payment!.toJson();
     }
-    data['distance'] = this.distance;
-    data['tipPercent'] = this.tipPercent;
-    data['existingFrom'] = this.existingFrom;
-    data['existingTo'] = this.existingTo;
+    data['distance'] = distance;
+    data['tipPercent'] = tipPercent;
+    data['existingFrom'] = existingFrom;
+    data['existingTo'] = existingTo;
     return data;
   }
 }
@@ -198,34 +198,34 @@ class Tramos {
     if (json['imagenes'] != null) {
       imagenes = <Imagenes>[];
       json['imagenes'].forEach((v) {
-        imagenes!.add(new Imagenes.fromJson(v));
+        imagenes!.add(Imagenes.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['nroTramo'] = this.nroTramo;
-    data['existingTo'] = this.existingTo;
-    data['aliasTo'] = this.aliasTo;
-    data['streetTo'] = this.streetTo;
-    data['cpTo'] = this.cpTo;
-    data['cityTo'] = this.cityTo;
-    data['numberTo'] = this.numberTo;
-    data['countryTo'] = this.countryTo;
-    data['florNummberTo'] = this.florNummberTo;
-    data['stateTo'] = this.stateTo;
-    data['descriptionTo'] = this.descriptionTo;
-    data['placeIdTo'] = this.placeIdTo;
-    data['latTo'] = this.latTo;
-    data['longTo'] = this.longTo;
-    data['longDirectionTo'] = this.longDirectionTo;
-    data['nroRemito'] = this.nroRemito;
-    data['tamanioCarga'] = this.tamanioCarga;
-    data['pesoCarga'] = this.pesoCarga;
-    data['acotacionesCarga'] = this.acotacionesCarga;
-    if (this.imagenes != null) {
-      data['imagenes'] = this.imagenes!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['nroTramo'] = nroTramo;
+    data['existingTo'] = existingTo;
+    data['aliasTo'] = aliasTo;
+    data['streetTo'] = streetTo;
+    data['cpTo'] = cpTo;
+    data['cityTo'] = cityTo;
+    data['numberTo'] = numberTo;
+    data['countryTo'] = countryTo;
+    data['florNummberTo'] = florNummberTo;
+    data['stateTo'] = stateTo;
+    data['descriptionTo'] = descriptionTo;
+    data['placeIdTo'] = placeIdTo;
+    data['latTo'] = latTo;
+    data['longTo'] = longTo;
+    data['longDirectionTo'] = longDirectionTo;
+    data['nroRemito'] = nroRemito;
+    data['tamanioCarga'] = tamanioCarga;
+    data['pesoCarga'] = pesoCarga;
+    data['acotacionesCarga'] = acotacionesCarga;
+    if (imagenes != null) {
+      data['imagenes'] = imagenes!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -245,9 +245,9 @@ class Imagenes {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['nombre'] = this.nombre;
-    data['mimeType'] = this.mimeType;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['nombre'] = nombre;
+    data['mimeType'] = mimeType;
     data['data'] = this.data;
     return data;
   }
