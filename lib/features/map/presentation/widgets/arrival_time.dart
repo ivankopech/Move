@@ -252,7 +252,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
       child: Column(
         children: [
           SizedBox(height: 50),
-          Container(
+          SizedBox(
             height: 120,
             child: Row(
               children: [
