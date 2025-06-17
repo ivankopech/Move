@@ -34,22 +34,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ItemInformationScreen(),
       ),
       GoRoute(
-        path: PhoneNumberScreen.path,
-        name: PhoneNumberScreen.name,
-        builder: (context, state) => const PhoneNumberScreen(),
-      ),
-      GoRoute(
-        path: CodeVerificationScreen.path,
-        name: CodeVerificationScreen.name,
-        builder: (context, state) {
-          final verificationId = state.extra;
-          if (verificationId == null || verificationId is! String) {
-            throw Exception('Missing or invalid verificationId');
-          }
-          return CodeVerificationScreen(verificationId: verificationId);
-        },
-      ),
-      GoRoute(
         path: PaymentScreen.path,
         name: PaymentScreen.name,
         builder: (context, state) => const PaymentScreen(),
