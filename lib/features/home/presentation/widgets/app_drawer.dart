@@ -6,7 +6,7 @@ import '../../../map/presentation/screens/map_input.dart';
 import '../../../requests/presentation/screens/get_requests_screen.dart';
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer();
+  const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {

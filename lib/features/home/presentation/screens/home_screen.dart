@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../auth/presentation/providers/login_state_notifier_provider.dart';
-import '../providers/user_state_notifier_provider.dart';
 import '../widgets/home_content.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {

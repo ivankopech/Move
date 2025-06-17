@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/models/auth_response_model.dart';
 import '../providers/login_state_notifier_provider.dart';
-import '../../../home/presentation/screens/home_screen.dart';
 import '../../../../utils/utils.dart';
 import '../../../verification_code/providers/send_code_state_notifier_provider.dart';
 import '../../../map/presentation/screens/map_input.dart';
