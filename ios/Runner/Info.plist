@@ -43,7 +43,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera access is needed to take photos</string>
+	<string>App requires camera access so you can take a photo of the item you want to move. This helps the moving service better manage your request.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Use locations to show addresses in map</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
