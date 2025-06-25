@@ -8,6 +8,7 @@ import '../../../../common/widgets/generic_error_screen.dart';
 import '../providers/get_requests_state_notifier_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../../map/presentation/screens/map_input.dart';
+import '../screens/track_request_screen.dart';
 import './row_details.dart';
 
 class GetRequestsWidget extends ConsumerStatefulWidget {
@@ -17,23 +18,41 @@ class GetRequestsWidget extends ConsumerStatefulWidget {
   ConsumerState<GetRequestsWidget> createState() => _GetRequestsWidgetState();
 }
 
-class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
+class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
+    with SingleTickerProviderStateMixin {
+  late TabController tabController;
+
+  final estados = ['Open', 'Accepted'];
   @override
   void initState() {
     super.initState();
+    tabController = TabController(length: estados.length, vsync: this);
     Future.microtask(() {
-      ref.read(getRequestsStateNotifierProvider.notifier).getRequests();
+      ref
+          .read(getRequestsStateNotifierProvider.notifier)
+          .getRequests(estados[0]);
+    });
+
+    tabController.addListener(() {
+      if (tabController.indexIsChanging) return;
+      final estado = estados[tabController.index];
+      ref.read(getRequestsStateNotifierProvider.notifier).getRequests(estado);
     });
   }
 
   void onRetry() {
-    ref.read(getRequestsStateNotifierProvider.notifier).getRequests();
+    final estadoActual = estados[tabController.index];
+    ref
+        .read(getRequestsStateNotifierProvider.notifier)
+        .getRequests(estadoActual);
   }
 
   @override
   Widget build(BuildContext context) {
     final requestState = ref.watch(getRequestsStateNotifierProvider);
     double screenWidth = MediaQuery.of(context).size.width;
+    final requests = requestState.value ?? [];
+
     return requestState.when(
       data: (requests) {
         return Scaffold(
@@ -50,6 +69,37 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    margin: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 249, 247, 247),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TabBar(
+                      controller: tabController,
+                      indicator: BoxDecoration(
+                        color: Colors.indigo,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      dividerColor: Colors.transparent,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.black,
+                      indicatorPadding: EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      labelPadding: EdgeInsets.symmetric(horizontal: 20),
+                      tabs: const [
+                        Tab(text: 'Untaken Requests'),
+                        Tab(text: 'Accepted Requests'),
+                      ],
+                    ),
+                  ),
+                ),
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -94,10 +144,7 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
                                             textAlign: TextAlign.center,
                                           ),
                                           const SizedBox(height: 10),
-                                          buildDetailRow(
-                                            'ID',
-                                            requestIndex.id.toString(),
-                                          ),
+                                          buildDetailRow('ID', id.toString()),
                                           buildDetailRow(
                                             'Date',
                                             DateFormat('MM/dd/yyy').format(
@@ -127,6 +174,15 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget> {
                                 },
                               );
                             },
+                          ),
+                          SlidableAction(
+                            onPressed: (context) {
+                              context.pushNamed(
+                                TrackRequestScreen.name,
+                                extra: id,
+                              );
+                            },
+                            icon: Icons.location_on_outlined,
                           ),
                         ],
                       ),
