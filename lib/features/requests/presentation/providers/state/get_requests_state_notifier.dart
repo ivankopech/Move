@@ -11,10 +11,10 @@ class GetRequestsStateNotifier
 
   late List<GetRequestsModel?> getRequestsModelList;
 
-  Future<void> getRequests() async {
+  Future<void> getRequests(String estado) async {
     try {
       state = AsyncValue.loading();
-      final result = await getRequestsDataUseCase();
+      final result = await getRequestsDataUseCase(estado);
 
       state = result.fold(
         (error) => AsyncValue.error(error, StackTrace.current),

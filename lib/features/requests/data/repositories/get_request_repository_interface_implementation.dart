@@ -11,10 +11,12 @@ class GetRequestRepositoryInterfaceImplementation
   GetRequestRepositoryInterfaceImplementation(this.apiClient);
 
   @override
-  Future<Result<List<GetRequestsModel?>>> getRequests() async {
+  Future<Result<List<GetRequestsModel?>>> getRequests({
+    required String estado,
+  }) async {
     try {
       final response = await apiClient.getData(
-        'services/app/Solicitud/GetSolicitudesActivasForClient?Estados=Open&SkipCount=0&MaxResultCount=600',
+        'services/app/Solicitud/GetSolicitudesActivasForClient?Estados=$estado&SkipCount=0&MaxResultCount=600',
         (json) {
           final result = GetRequestsModelResponse.fromJson(json['result']);
           var list = result.items;
