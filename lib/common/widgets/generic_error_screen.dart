@@ -18,6 +18,7 @@ class GenericErrorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Center(
