@@ -22,13 +22,13 @@ final getRequestsDataUseCaseProvider = Provider<GetRequestsDataUseCase>(
   ),
 );
 
+//TRACK REQUEST
 final trackRequestRepositoryInterfaceProvider =
     Provider<TrackRequestRepositoryInterface>((ref) {
       final apiClient = ref.read(apiClientProvider);
       return TrackRequestRepositoryInterfaceImplementation(apiClient);
     });
-
-//USE CASE PROVIDER
+// USE CASE PROVIDERS
 final trackRequestDataUseCaseProvider = Provider<TrackRequestDataUseCase>(
   (ref) => TrackRequestDataUseCase(
     trackRequestRepositoryInterface: ref.watch(
