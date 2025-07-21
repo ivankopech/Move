@@ -40,7 +40,6 @@ class TrackRequestModel {
   });
 
   TrackRequestModel.fromJson(Map<String, dynamic> json) {
-    var result = json['result'];
     time = json['time'];
     latitude = json['latitude'];
     longitude = json['longitude'];

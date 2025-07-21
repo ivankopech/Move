@@ -342,9 +342,6 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
 
               final combinedDate = combineDateWithHour(dateISO, formattedTime);
 
-              print('fecha: $dateISO');
-              print('hora: $formattedTime');
-
               ref.read(detailsProvider.notifier).setStartDate(combinedDate);
               ref.read(detailsProvider.notifier).setStartTime(formattedTime);
 

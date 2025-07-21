@@ -202,8 +202,6 @@ class _AddressInputState extends ConsumerState<AddressInput> {
     double? lat;
     double? lng;
 
-    double? distance;
-
     if (parts[0].contains("PRF")) {
       final streetAndNumber = parts[1].split(' ');
       number = streetAndNumber.removeLast();
@@ -295,11 +293,9 @@ class _AddressInputState extends ConsumerState<AddressInput> {
         final distanceInMeters =
             data['rows'][0]['elements'][0]['distance']['value'];
 
-        // Convierte la distancia de metros a kilómetros (si es necesario)
         final distanceInKm = distanceInMeters / 1000.0;
 
         final truncatedDistance = (distanceInKm * 10).truncateToDouble() / 10;
-        //ref.read(distanceProvider.notifier).state = truncatedDistance;
         return truncatedDistance;
       } else {
         throw Exception('Error al obtener la distancia');

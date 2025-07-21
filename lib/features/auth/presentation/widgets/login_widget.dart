@@ -69,7 +69,6 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
       }
       if (next is AsyncError) {}
     });
-    final authState = ref.watch(loginStateNotifierProvider);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: appColors.backgroundColor,

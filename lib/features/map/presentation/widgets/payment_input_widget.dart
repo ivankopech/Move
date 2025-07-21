@@ -37,7 +37,6 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
               onMessageReceived: (message) async {
                 final data = jsonDecode(message.message);
                 token = data['token'];
-                print('el token es $token');
                 await sendRequest();
               },
             )
@@ -70,7 +69,6 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
   Future<bool> sendRequest() async {
     final origin = ref.watch(originAddressProvider);
     if (origin == null) {
-      // Mostramos un error o retornamos
       print('Origin is null');
       return false;
     }
@@ -187,7 +185,6 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final requestsState = ref.watch(createRequestStateNotifierProvider);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(title: Text('Insert a payment method')),

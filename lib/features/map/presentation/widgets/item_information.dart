@@ -52,16 +52,10 @@ class _ItemInformationState extends ConsumerState<ItemInformation> {
 
         String? fileName = file.uri.pathSegments.last;
 
-        // Obtener MIME type
         String? mimeType = lookupMimeType(file.path);
 
-        // Convertir los bytes PNG a Base64
         String base64Data = base64Encode(pngBytes);
 
-        print(fileName);
-        print(mimeType);
-        print(base64Data);
-        // Retornar el nombre del archivo, MIME type y los datos en Base64
         ref.read(imagesProvider.notifier).setName(fileName);
         ref.read(imagesProvider.notifier).setMimeType(mimeType!);
         ref.read(imagesProvider.notifier).setData(base64Data);
@@ -116,7 +110,6 @@ class _ItemInformationState extends ConsumerState<ItemInformation> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isFormFilled = controller.text.trim().isNotEmpty;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(title: Text('What would you like to move?')),
