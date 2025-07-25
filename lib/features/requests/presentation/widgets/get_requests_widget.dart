@@ -51,7 +51,6 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
   Widget build(BuildContext context) {
     final requestState = ref.watch(getRequestsStateNotifierProvider);
     double screenWidth = MediaQuery.of(context).size.width;
-    final requests = requestState.value ?? [];
 
     return requestState.when(
       data: (requests) {
