@@ -68,6 +68,7 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
 
   Future<bool> sendRequest() async {
     final origin = ref.watch(originAddressProvider);
+
     if (origin == null) {
       print('Origin is null');
       return false;
@@ -77,6 +78,7 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
       final distance = ref.watch(distanceProvider);
       final details = ref.watch(detailsProvider);
       final images = ref.watch(imagesProvider);
+      final vehicleId = ref.watch(vehicleProvider);
 
       final payment = Payment(paymentMethodId: 1, token: token);
 
@@ -156,7 +158,7 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
             details.startDate,
             details.startTime,
             '',
-            2,
+            vehicleId,
             2,
             tramos,
             payment,
