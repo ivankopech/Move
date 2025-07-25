@@ -36,7 +36,7 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.question_mark_outlined),
-            title: const Text('Untaken Requests'),
+            title: const Text('My Requests'),
             onTap: () {
               context.go(GetRequestsScreen.path);
             },
