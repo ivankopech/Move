@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:move/config/api_client_provider.dart';
+import 'package:move/features/map/data/models/create_request.dart';
 import 'package:move/features/map/data/repositories/repositories.dart';
 import 'package:move/features/map/domain/repositories/repositories.dart';
 import 'package:move/features/map/domain/repositories/vehicle_type_repository_interface.dart';
@@ -66,6 +67,7 @@ final vehicleTypeUseCaseProvider = Provider<VehicleTypeUseCase>(
 final originAddressProvider = StateProvider<AddressModel?>((ref) => null);
 final destinationAddressProvider = StateProvider<AddressModel?>((ref) => null);
 final distanceProvider = StateProvider<Distance?>((ref) => null);
+final vehicleProvider = StateProvider<int?>((ref) => null);
 final imagesProvider = StateNotifierProvider<ImagesNotifier, ImagesModel>((
   ref,
 ) {
