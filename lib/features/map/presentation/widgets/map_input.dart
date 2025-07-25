@@ -6,20 +6,23 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '/features/map/presentation/screens/address_input.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../home/presentation/widgets/app_drawer.dart';
 import './input_address_sheet.dart';
 import '../widgets/map_helper.dart';
 import './arrival_time.dart';
 
-class MapInputWidget extends StatefulWidget {
+import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
+
+class MapInputWidget extends ConsumerStatefulWidget {
   const MapInputWidget({super.key});
 
   @override
-  State<MapInputWidget> createState() => _MapInputWidgetState();
+  ConsumerState<MapInputWidget> createState() => _MapInputWidgetState();
 }
 
-class _MapInputWidgetState extends State<MapInputWidget> {
+class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
   final LatLng center = const LatLng(-32.944242, -60.650538);
   GoogleMapController? mapController;
   LatLng? currentPosition;
@@ -31,12 +34,18 @@ class _MapInputWidgetState extends State<MapInputWidget> {
   Set<Polyline> polylines = {};
   String apiKey = dotenv.env['API_KEY'] ?? '';
   bool showInputSheet = true;
+  bool checkedTips = false;
 
   @override
   void initState() {
     super.initState();
     currentLocation();
     loadEnv();
+    Future.microtask(() {
+      ref
+          .read(getRequestsStateNotifierProvider.notifier)
+          .getRequests('Finished');
+    });
   }
 
   Future<void> loadEnv() async {
@@ -158,6 +167,14 @@ class _MapInputWidgetState extends State<MapInputWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final finishedRequests = ref.watch(getRequestsStateNotifierProvider);
+
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (finishedRequests is AsyncData) {
+    //     final requestsWithoutTip = finishedRequests.value.where((r) => );
+    //   }
+    // });
+
     return Scaffold(
       drawer: const AppDrawer(),
       body:
