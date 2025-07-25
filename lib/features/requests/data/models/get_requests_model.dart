@@ -43,6 +43,7 @@ class GetRequestsModel {
   int? origin;
   int? cantidadTramos;
   String? uniqueId;
+  List<Tracking>? tracking;
 
   GetRequestsModel({
     this.id,
@@ -63,6 +64,7 @@ class GetRequestsModel {
     this.origin,
     this.cantidadTramos,
     this.uniqueId,
+    this.tracking,
   });
 
   GetRequestsModel.fromJson(Map<String, dynamic> json) {
@@ -84,6 +86,12 @@ class GetRequestsModel {
     origin = json['origin'];
     cantidadTramos = json['cantidadTramos'];
     uniqueId = json['uniqueId'];
+    if (json['tracking'] != null) {
+      tracking = <Tracking>[];
+      json['tracking'].forEach((v) {
+        tracking!.add(Tracking.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -106,6 +114,43 @@ class GetRequestsModel {
     data['origin'] = origin;
     data['cantidadTramos'] = cantidadTramos;
     data['uniqueId'] = uniqueId;
+    if (tracking != null) {
+      data['tracking'] = tracking!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Tracking {
+  String? time;
+  int? latitude;
+  int? longitude;
+  String? placeId;
+  String? createdOn;
+
+  Tracking({
+    this.time,
+    this.latitude,
+    this.longitude,
+    this.placeId,
+    this.createdOn,
+  });
+
+  Tracking.fromJson(Map<String, dynamic> json) {
+    time = json['time'];
+    latitude = json['latitude'];
+    longitude = json['longitude'];
+    placeId = json['placeId'];
+    createdOn = json['createdOn'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['time'] = time;
+    data['latitude'] = latitude;
+    data['longitude'] = longitude;
+    data['placeId'] = placeId;
+    data['createdOn'] = createdOn;
     return data;
   }
 }
