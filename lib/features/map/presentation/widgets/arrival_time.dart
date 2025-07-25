@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:move/features/map/data/models/vehicle_type.dart';
 import 'package:move/features/map/presentation/providers/providers.dart';
 
+import '../../../../common/widgets/generic_error_screen.dart';
+import '../../../../common/widgets/loader_widget.dart';
 import '../screens/item_information.dart';
+import '../providers/vehicle_type_state_notifier_provider.dart';
 
 class ArrivalTime extends ConsumerStatefulWidget {
   const ArrivalTime({super.key});
@@ -14,8 +20,8 @@ class ArrivalTime extends ConsumerStatefulWidget {
 }
 
 class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
-  int? selectedIndex;
-  Map<String, dynamic>? selectedVehicle;
+  int? selectedIndex = 0;
+  VehicleTypeModel? selectedVehicle;
   String? title;
   final FixedExtentScrollController dateController =
       FixedExtentScrollController();
@@ -23,53 +29,14 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
       FixedExtentScrollController();
   int selectedDateIndex = 0;
   int selectedTimeIndex = 0;
-  final List<Map<String, dynamic>> vehicleOptions = [
-    {
-      "title": "Lite",
-      "luggers": 1,
-      "basePrice": 64.24,
-      "perMinute": 0.95,
-      "image": "assets/images/pickup.png",
-      "description":
-          "Perfect for moving your sofa, some boxes or just few items",
-    },
-    {
-      "title": "Pickup",
-      "luggers": 2,
-      "basePrice": 82.58,
-      "perMinute": 1.62,
-      "image": "assets/images/pickup.png",
-      "description":
-          "Perfect for moving your sofa, some boxes or just few items",
-    },
-    {
-      "title": "Van",
-      "luggers": 2,
-      "basePrice": 131.21,
-      "perMinute": 2.02,
-      "image": "assets/images/pickup.png",
-      "description":
-          "Ideal for a room full of stuff, such as your living room or bedroom",
-    },
-    {
-      "title": "XL",
-      "luggers": 2,
-      "basePrice": 207.25,
-      "perMinute": 2.30,
-      "image": "assets/images/pickup.png",
-      "description":
-          "Great for moving your whole apartment, a small office or oversized items",
-    },
-    {
-      "title": "Box",
-      "luggers": 2,
-      "basePrice": 272.82,
-      "perMinute": 3.00,
-      "image": "assets/images/pickup.png",
-      "description":
-          "Great for moving your whole apartment, a small office or oversized items",
-    },
-  ];
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(vehicleTypeStateNotifierProvider.notifier).getTypes();
+    });
+  }
 
   Widget buildOptionCard(
     Map<String, dynamic> option,
@@ -90,12 +57,12 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
     );
   }
 
-  Widget displayVehicles() {
+  Widget displayVehicles(List<VehicleTypeModel?> vehicleType) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: List.generate(vehicleOptions.length, (index) {
-          final vehicle = vehicleOptions[index];
+        children: List.generate(vehicleType.length, (index) {
+          final vehicle = vehicleType[index];
           final bool isSelected = (selectedIndex ?? -1) == index;
 
           return GestureDetector(
@@ -103,6 +70,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
               setState(() {
                 selectedIndex = index;
                 selectedVehicle = vehicle;
+                ref.read(vehicleProvider.notifier).state = selectedIndex;
               });
             },
             child: AnimatedScale(
@@ -135,9 +103,9 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(child: Image.asset(vehicle['image'], scale: 2)),
+                    Expanded(child: Image.asset('assets/images/$index.jpeg')),
                     Text(
-                      vehicle['title'],
+                      vehicle!.vehicleTypeName ?? '',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
@@ -158,16 +126,18 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
     return Column(
       children: [
         if (selectedVehicle != null)
-          Center(child: Image.asset(selectedVehicle!['image'], scale: 3)),
+          Center(
+            child: Image.asset('assets/images/$selectedIndex.jpeg', scale: 2),
+          ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (selectedVehicle != null)
               Text(
-                selectedVehicle!["title"],
+                selectedVehicle!.vehicleTypeName ?? '',
                 style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 35,
+                  fontWeight: FontWeight.w300,
                 ),
               ),
             const SizedBox(width: 5),
@@ -176,13 +146,17 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
                 height: 35,
                 width: 100,
                 child: Chip(
-                  label: Text("${selectedVehicle!["luggers"]} Luggers"),
+                  label: Text(
+                    selectedVehicle!.maxAssistants == 1
+                        ? '${selectedVehicle!.maxAssistants ?? ''} Lugger'
+                        : '${selectedVehicle!.maxAssistants ?? ''} Luggers',
+                  ),
                   backgroundColor:
-                      selectedVehicle!['luggers'] == 1
+                      selectedVehicle!.maxAssistants == 1
                           ? Colors.red.shade100
                           : Colors.blue.shade100,
                   labelStyle:
-                      selectedVehicle!['luggers'] == 1
+                      selectedVehicle!.maxAssistants == 1
                           ? const TextStyle(color: Colors.red)
                           : const TextStyle(color: Colors.indigo),
                   shape: RoundedRectangleBorder(
@@ -193,16 +167,6 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
               ),
           ],
         ),
-        SizedBox(height: 10),
-        if (selectedVehicle != null)
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text(
-              selectedVehicle!['description'],
-              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-            ),
-          ),
         SizedBox(height: 15),
         if (selectedVehicle != null)
           RichText(
@@ -210,15 +174,15 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
               children: [
                 TextSpan(
                   text:
-                      '\$${selectedVehicle!['basePrice']} + \$${selectedVehicle!['perMinute']} ',
+                      '\$${selectedVehicle!.basicPrice} + \$${selectedVehicle!.priceHour}',
                   style: TextStyle(
                     color: Colors.black,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w300,
                   ),
                 ),
                 TextSpan(
-                  text: ' per min labor',
+                  text: ' per hour',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 17,
@@ -332,7 +296,6 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
             onPressed: () async {
               final rawDate = dateLabels[selectedDateIndex];
               final time = timeSlots[selectedTimeIndex];
-              //final result = '$date | $time';
 
               final date = getDateFromString(rawDate);
               final updatedDate = '${date.day}/${date.month}/${date.year}';
@@ -345,7 +308,6 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
               ref.read(detailsProvider.notifier).setStartDate(combinedDate);
               ref.read(detailsProvider.notifier).setStartTime(formattedTime);
 
-              //print('selected $result');
               await context.push<Map<String, String>>(
                 ItemInformationScreen.path,
               );
@@ -413,7 +375,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
 
   String parseToISO8601(String date) {
     if (date.isEmpty) {
-      return 'Invalid or empty date'; // Handle empty input gracefully
+      return 'Invalid or empty date';
     }
 
     List<String> parts = date.split('/');
@@ -426,7 +388,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
     int year = int.parse(parts[2]);
 
     DateTime dateTime = DateTime(year, month, day);
-    return dateTime.toUtc().toIso8601String(); // Convert to ISO 8601 format
+    return dateTime.toUtc().toIso8601String();
   }
 
   String combineDateWithHour(String isoDate, String hour) {
@@ -444,20 +406,36 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
       0,
     );
 
-    return updatedDate.toIso8601String(); // ya incluye la Z (UTC)
+    return updatedDate.toIso8601String();
+  }
+
+  void onRetry() {
+    ref.read(vehicleTypeStateNotifierProvider.notifier).getTypes();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Set arrival time')),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [displayVehicles(), datosVehicle(), datePicker()],
-        ),
-      ),
+    final vehicleTypeState = ref.watch(vehicleTypeStateNotifierProvider);
+    return vehicleTypeState.when(
+      data: (vehicleType) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(title: Text('Set arrival time')),
+          body: SingleChildScrollView(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                displayVehicles(vehicleType),
+                datosVehicle(),
+                datePicker(),
+              ],
+            ),
+          ),
+        );
+      },
+      error: (error, stackTrace) => GenericErrorScreen(onRetry: onRetry),
+      loading: () => const LoaderWidget(),
     );
   }
 }
