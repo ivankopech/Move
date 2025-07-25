@@ -8,7 +8,7 @@ class VehicleTypeUseCase {
 
   VehicleTypeUseCase({required this.vehicleTypeRepositoryInterface});
 
-  Future<Either<ApiException, VehicleTypeModel?>> call() async {
+  Future<Either<ApiException, List<VehicleTypeModel?>>> call() async {
     return vehicleTypeRepositoryInterface.getTypes();
   }
 }

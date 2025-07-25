@@ -5,7 +5,7 @@ import '../../presentation/providers/state/vehicle_type_state_notifier.dart';
 
 final vehicleTypeStateNotifierProvider = StateNotifierProvider<
   VehicleTypeStateNotifier,
-  AsyncValue<VehicleTypeModel?>
+  AsyncValue<List<VehicleTypeModel?>>
 >((ref) {
   return VehicleTypeStateNotifier(
     vehicleTypeUseCase: ref.read(vehicleTypeUseCaseProvider),

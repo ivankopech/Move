@@ -3,13 +3,13 @@ import '../../../data/models/vehicle_type.dart';
 import '../../../domain/use_cases/vehicle_type_use_case.dart';
 
 class VehicleTypeStateNotifier
-    extends StateNotifier<AsyncValue<VehicleTypeModel?>> {
+    extends StateNotifier<AsyncValue<List<VehicleTypeModel?>>> {
   final VehicleTypeUseCase vehicleTypeUseCase;
 
   VehicleTypeStateNotifier({required this.vehicleTypeUseCase})
-    : super(const AsyncValue.data(null));
+    : super(const AsyncValue.loading());
 
-  late VehicleTypeModel? vehicleTypeModel;
+  late List<VehicleTypeModel?> vehicleTypeModelList;
 
   Future<void> getTypes() async {
     try {
@@ -19,7 +19,7 @@ class VehicleTypeStateNotifier
       state = result.fold(
         (error) => AsyncValue.error(error, StackTrace.current),
         (data) {
-          vehicleTypeModel = data;
+          vehicleTypeModelList = data;
           return AsyncValue.data(data);
         },
       );

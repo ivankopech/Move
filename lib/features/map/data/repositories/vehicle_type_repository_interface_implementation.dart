@@ -11,15 +11,19 @@ class VehicleTypeRepositoryInterfaceImplementation
   VehicleTypeRepositoryInterfaceImplementation(this.apiClient);
 
   @override
-  Future<Result<VehicleTypeModel?>> getTypes() async {
+  Future<Result<List<VehicleTypeModel?>>> getTypes() async {
     try {
       final response = await apiClient.postData(
         'services/app/Pricing/ListVehicleTypePrice',
         {},
-        (json) => VehicleTypeModel.fromJson(json),
+        (json) {
+          final result = VehicleTypeModelResponse.fromJson(json);
+          var list = result.items;
+          return list ?? [];
+        },
       );
       return response.fold((error) => Left(error), (data) async {
-        return Right(data);
+        return Right(data!);
       });
     } catch (e, stackTrace) {
       return Left(
