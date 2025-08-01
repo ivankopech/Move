@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:move/common/widgets/loader_widget.dart';
 import '/features/map/presentation/screens/address_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,6 +13,7 @@ import '../../../home/presentation/widgets/app_drawer.dart';
 import './input_address_sheet.dart';
 import '../widgets/map_helper.dart';
 import './arrival_time.dart';
+import './tip_dialog.dart';
 
 import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
 
@@ -34,17 +36,21 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
   Set<Polyline> polylines = {};
   String apiKey = dotenv.env['API_KEY'] ?? '';
   bool showInputSheet = true;
-  bool checkedTips = false;
+  bool hasShownDialog = false;
 
   @override
   void initState() {
     super.initState();
     currentLocation();
     loadEnv();
-    Future.microtask(() {
-      ref
+    Future.microtask(() async {
+      await ref
           .read(getRequestsStateNotifierProvider.notifier)
           .getRequests('Finished');
+
+      await Future.delayed(Duration(milliseconds: 300));
+
+      showTipDialog();
     });
   }
 
@@ -165,15 +171,53 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
     });
   }
 
+  void showTipDialog() async {
+    if (hasShownDialog) return;
+    final finishedRequests = ref.read(getRequestsStateNotifierProvider);
+    finishedRequests.when(
+      data: (request) async {
+        final toPrompt =
+            request
+                .where((r) => r?.tipAmount == 0.0 && r?.tipPercent == 0.0)
+                .toList();
+
+        if (toPrompt.isEmpty) return;
+
+        hasShownDialog = true;
+
+        for (final request in toPrompt) {
+          if (request == null) continue;
+
+          final from = '${request.calleDesde} ${request.numeroDesde}';
+          final to = '${request.calleHasta} ${request.numeroHasta}';
+
+          final result = await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder:
+                (_) => TipDialog(
+                  id: request.id,
+                  from: from,
+                  to: to,
+                  date: request.fechaViaje,
+                ),
+          );
+
+          if (result == true) {
+            await ref
+                .read(getRequestsStateNotifierProvider.notifier)
+                .getRequests('Finished');
+          }
+        }
+      },
+      loading: () => LoaderWidget(),
+      error: (e, _) => print('Error: $e'),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final finishedRequests = ref.watch(getRequestsStateNotifierProvider);
-
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (finishedRequests is AsyncData) {
-    //     final requestsWithoutTip = finishedRequests.value.where((r) => );
-    //   }
-    // });
 
     return Scaffold(
       drawer: const AppDrawer(),
