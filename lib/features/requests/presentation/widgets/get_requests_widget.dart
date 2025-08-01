@@ -22,7 +22,7 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
 
-  final estados = ['Open', 'Accepted'];
+  final estados = ['Open', 'Accepted', 'Finished'];
   @override
   void initState() {
     super.initState();
@@ -93,8 +93,9 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
                       ),
                       labelPadding: EdgeInsets.symmetric(horizontal: 20),
                       tabs: const [
-                        Tab(text: 'Untaken Requests'),
-                        Tab(text: 'Accepted Requests'),
+                        Tab(text: 'Untaken'),
+                        Tab(text: 'Accepted'),
+                        Tab(text: 'Finished'),
                       ],
                     ),
                   ),
