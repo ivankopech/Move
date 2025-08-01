@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:move/config/router/router_provider.dart';
@@ -6,6 +7,8 @@ import 'package:move/config/router/router_provider.dart';
 Future<void> main() async {
   await dotenv.load(fileName: '.env');
   runApp(ProviderScope(child: const MyApp()));
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 }
 
 class MyApp extends ConsumerWidget {
