@@ -36,7 +36,9 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
               'SquareChannel',
               onMessageReceived: (message) async {
                 final data = jsonDecode(message.message);
-                token = data['token'];
+                setState(() {
+                  token = data['token'];
+                });
                 await sendRequest();
               },
             )
@@ -44,7 +46,6 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
               NavigationDelegate(
                 onNavigationRequest: (request) {
                   if (request.url == 'success://home') {
-                    //Navigator.of(context).popUntil((route) => route.isFirst);
                     return NavigationDecision.prevent;
                   }
                   return NavigationDecision.navigate;
