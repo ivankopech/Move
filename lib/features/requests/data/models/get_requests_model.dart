@@ -44,6 +44,8 @@ class GetRequestsModel {
   int? cantidadTramos;
   String? uniqueId;
   List<Tracking>? tracking;
+  double? tipPercent;
+  double? tipAmount;
 
   GetRequestsModel({
     this.id,
@@ -65,6 +67,8 @@ class GetRequestsModel {
     this.cantidadTramos,
     this.uniqueId,
     this.tracking,
+    this.tipPercent,
+    this.tipAmount,
   });
 
   GetRequestsModel.fromJson(Map<String, dynamic> json) {
@@ -92,6 +96,8 @@ class GetRequestsModel {
         tracking!.add(Tracking.fromJson(v));
       });
     }
+    tipPercent = json['tipPercent'];
+    tipAmount = json['tipAmount'];
   }
 
   Map<String, dynamic> toJson() {
@@ -117,6 +123,8 @@ class GetRequestsModel {
     if (tracking != null) {
       data['tracking'] = tracking!.map((v) => v.toJson()).toList();
     }
+    data['tipPercent'] = tipPercent;
+    data['tipAmount'] = tipAmount;
     return data;
   }
 }
