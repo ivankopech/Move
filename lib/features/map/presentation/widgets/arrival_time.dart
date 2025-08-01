@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +27,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
       FixedExtentScrollController();
   int selectedDateIndex = 0;
   int selectedTimeIndex = 0;
+  int? imageNumber;
 
   @override
   void initState() {
@@ -63,14 +62,16 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
       child: Row(
         children: List.generate(vehicleType.length, (index) {
           final vehicle = vehicleType[index];
-          final bool isSelected = (selectedIndex ?? -1) == index;
+          final bool isSelected = (selectedIndex) == index;
 
           return GestureDetector(
             onTap: () {
               setState(() {
                 selectedIndex = index;
                 selectedVehicle = vehicle;
-                ref.read(vehicleProvider.notifier).state = selectedIndex;
+                imageNumber = index + 1;
+
+                ref.read(vehicleProvider.notifier).state = (imageNumber);
               });
             },
             child: AnimatedScale(
@@ -103,7 +104,9 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(child: Image.asset('assets/images/$index.jpeg')),
+                    Expanded(
+                      child: Image.asset('assets/images/${index + 1}.jpeg'),
+                    ),
                     Text(
                       vehicle!.vehicleTypeName ?? '',
                       style: TextStyle(
@@ -127,7 +130,11 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
       children: [
         if (selectedVehicle != null)
           Center(
-            child: Image.asset('assets/images/$selectedIndex.jpeg', scale: 2),
+            child: Image.asset(
+              'assets/images/$imageNumber.jpeg',
+              scale: 2,
+              errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+            ),
           ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
