@@ -7,6 +7,8 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val apiKey = keystoreProperties.getProperty("GOOGLE_API_KEY")
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -38,6 +40,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         manifestPlaceholders["GOOGLE_API_KEY"] = project.findProperty("GOOGLE_API_KEY") ?: ""
+        manifestPlaceholders["GOOGLE_API_KEY"] = apiKey
     }
 
     signingConfigs {
