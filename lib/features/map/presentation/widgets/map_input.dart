@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:io' show Platform;
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:move/common/widgets/loader_widget.dart';
 import '/features/map/presentation/screens/address_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../../../home/presentation/widgets/app_drawer.dart';
 import './input_address_sheet.dart';
@@ -67,7 +69,10 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      print('location services are disabled');
+      showLocationDialog(
+        title: 'Service disabled',
+        message: 'Please activate location services on your device',
+      );
       return;
     }
 
@@ -75,26 +80,37 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        print("Location permissions are denied.");
+        showLocationDialog(
+          title: 'Permission denied',
+          message: 'We need your location to continue',
+        );
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      print("Location permissions are permanently denied.");
+      showLocationDialog(
+        title: 'Permission permanently denied',
+        message: 'You must allow location permissions on your device settings',
+        openSettings: true,
+      );
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.bestForNavigation,
-    );
-    LatLng userLatLng = LatLng(position.latitude, position.longitude);
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation,
+      );
+      LatLng userLatLng = LatLng(position.latitude, position.longitude);
 
-    setState(() {
-      currentPosition = userLatLng;
-      selectedPosition = userLatLng;
-    });
-    getAddressLatLng(userLatLng);
+      setState(() {
+        currentPosition = userLatLng;
+        selectedPosition = userLatLng;
+      });
+      getAddressLatLng(userLatLng);
+    } catch (e) {
+      print('Error while obtaining location: $e');
+    }
   }
 
   Future<void> getAddressLatLng(LatLng position) async {
@@ -212,6 +228,58 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
       },
       loading: () => LoaderWidget(),
       error: (e, _) => print('Error: $e'),
+    );
+  }
+
+  void showLocationDialog({
+    required String title,
+    required String message,
+    bool openSettings = false,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        if (Platform.isIOS) {
+          return CupertinoAlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              if (openSettings)
+                CupertinoDialogAction(
+                  onPressed: () {
+                    Geolocator.openAppSettings();
+                    Navigator.pop(context);
+                  },
+                  child: Text('Open config'),
+                ),
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context),
+                isDefaultAction: true,
+                child: Text('Close'),
+              ),
+            ],
+          );
+        } else {
+          return AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              if (openSettings)
+                TextButton(
+                  onPressed: () {
+                    Geolocator.openAppSettings();
+                    Navigator.pop(context);
+                  },
+                  child: Text('Open config'),
+                ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cerrar'),
+              ),
+            ],
+          );
+        }
+      },
     );
   }
 
