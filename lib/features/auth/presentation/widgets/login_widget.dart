@@ -51,11 +51,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
 
     try {
       await ref.read(loginStateNotifierProvider.notifier).login(number, code);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('An error ocurred')));
-    }
+    } catch (e) {}
   }
 
   @override
@@ -67,7 +63,17 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
       if (next is AsyncData && next.value != null) {
         context.go(MapInputScreen.path);
       }
-      if (next is AsyncError) {}
+      if (next is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: const Text(
+              'Incorrect phone number or password. Try again',
+            ),
+          ),
+        );
+        return;
+      }
     });
     return Scaffold(
       resizeToAvoidBottomInset: true,
