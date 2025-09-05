@@ -8,7 +8,7 @@ class SendCodeUseCase {
 
   SendCodeUseCase({required this.sendCodeRepositoryInterface});
 
-  Future<Either<ApiException, SendCodeModel?>> call(String number) async {
+  Future<Either<ApiException, bool?>> call(String number) async {
     return sendCodeRepositoryInterface.sendCode(number);
   }
 }

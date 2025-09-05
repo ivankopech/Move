@@ -2,11 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/send_code_model.dart';
 import '../../domain/use_cases/send_code_use_case.dart';
 
-class SendCodeStateNotifier extends StateNotifier<AsyncValue<SendCodeModel?>> {
+class SendCodeStateNotifier extends StateNotifier<AsyncValue<bool?>> {
   final SendCodeUseCase sendCodeUseCase;
 
   SendCodeStateNotifier({required this.sendCodeUseCase})
-    : super(const AsyncValue.data(null));
+    : super(const AsyncValue.data(false));
 
   late SendCodeModel? sendCodeModel;
 
@@ -17,10 +17,7 @@ class SendCodeStateNotifier extends StateNotifier<AsyncValue<SendCodeModel?>> {
 
       state = result.fold(
         (error) => AsyncValue.error(error, StackTrace.current),
-        (data) {
-          sendCodeModel = data;
-          return AsyncValue.data(data);
-        },
+        (data) => AsyncValue.data(data),
       );
     } catch (error, stackTrace) {
       print("Error fetching data: $error");

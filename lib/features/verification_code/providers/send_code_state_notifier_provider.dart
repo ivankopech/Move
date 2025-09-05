@@ -4,9 +4,7 @@ import 'providers.dart';
 import 'state/send_code_state_notifier.dart';
 
 final sendCodeStateNotifierProvider =
-    StateNotifierProvider<SendCodeStateNotifier, AsyncValue<SendCodeModel?>>((
-      ref,
-    ) {
+    StateNotifierProvider<SendCodeStateNotifier, AsyncValue<bool?>>((ref) {
       return SendCodeStateNotifier(
         sendCodeUseCase: ref.read(sendCodeUseCaseProvider),
       );
