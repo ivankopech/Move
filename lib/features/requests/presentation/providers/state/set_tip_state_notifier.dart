@@ -10,10 +10,15 @@ class SetTipStateNotifier extends StateNotifier<AsyncValue<SetTipModel?>> {
 
   late SetTipModel? setTipModel;
 
-  Future<void> setTip(int? id, double? tipPercentage, double? tipAmount) async {
+  Future<void> setTip(
+    int? id,
+    double? tipPercentage,
+    double? tipAmount,
+    bool? noTip,
+  ) async {
     try {
       state = AsyncValue.loading();
-      final result = await setTipUseCase(id, tipPercentage, tipAmount);
+      final result = await setTipUseCase(id, tipPercentage, tipAmount, noTip);
 
       state = result.fold(
         (error) => AsyncValue.error(error, StackTrace.current),

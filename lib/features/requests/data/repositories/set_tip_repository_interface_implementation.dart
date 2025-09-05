@@ -15,9 +15,14 @@ class SetTipRepositoryInterfaceImplementation
     int? id,
     double? tipPercentaje,
     double? tipAmount,
+    bool? noTip,
   ) async {
     try {
-      final body = {'tipPercentaje': tipPercentaje, 'tipAmount': tipAmount};
+      final body = {
+        'tipPercentaje': tipPercentaje,
+        'tipAmount': tipAmount,
+        'noTip': noTip,
+      };
 
       final response = await apiClient.putData(
         'services/app/Solicitud/SetTip/$id',

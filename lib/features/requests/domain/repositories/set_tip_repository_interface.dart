@@ -6,5 +6,6 @@ abstract class SetTipRepositoryInterface {
     int? id,
     double? tipPercentaje,
     double? tipAmount,
+    bool? noTip,
   );
 }

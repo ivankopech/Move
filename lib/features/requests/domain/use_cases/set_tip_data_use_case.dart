@@ -12,7 +12,13 @@ class SetTipUseCase {
     int? id,
     double? tipPercentaje,
     double? tipAmount,
+    bool? noTip,
   ) async {
-    return setTipRepositoryInterface.setTip(id, tipPercentaje, tipAmount);
+    return setTipRepositoryInterface.setTip(
+      id,
+      tipPercentaje,
+      tipAmount,
+      noTip,
+    );
   }
 }
