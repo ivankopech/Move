@@ -10,7 +10,11 @@ class GetRequestsDataUseCase {
 
   Future<Either<ApiException, List<GetRequestsModel?>>> call(
     String estado,
+    bool hasTip,
   ) async {
-    return getRequestsRepositoryInterface.getRequests(estado: estado);
+    return getRequestsRepositoryInterface.getRequests(
+      estado: estado,
+      hasTip: hasTip,
+    );
   }
 }

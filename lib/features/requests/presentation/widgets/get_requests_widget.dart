@@ -30,13 +30,15 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
     Future.microtask(() {
       ref
           .read(getRequestsStateNotifierProvider.notifier)
-          .getRequests(estados[0]);
+          .getRequests(estados[0], false);
     });
 
     tabController.addListener(() {
       if (tabController.indexIsChanging) return;
       final estado = estados[tabController.index];
-      ref.read(getRequestsStateNotifierProvider.notifier).getRequests(estado);
+      ref
+          .read(getRequestsStateNotifierProvider.notifier)
+          .getRequests(estado, false);
     });
   }
 
@@ -44,7 +46,7 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
     final estadoActual = estados[tabController.index];
     ref
         .read(getRequestsStateNotifierProvider.notifier)
-        .getRequests(estadoActual);
+        .getRequests(estadoActual, true);
   }
 
   @override
