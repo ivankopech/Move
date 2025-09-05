@@ -117,7 +117,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                               hintText: 'Enter your phone number',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.all(
-                                  Radius.circular(20),
+                                  Radius.circular(30),
                                 ),
                               ),
                               prefixIcon: Icon(Icons.phone),
@@ -132,7 +132,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                                 hintText: 'Enter verification code',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.all(
-                                    Radius.circular(20),
+                                    Radius.circular(30),
                                   ),
                                 ),
                                 prefixIcon: Icon(Icons.lock),
@@ -173,7 +173,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                                         child: Container(
                                           constraints: const BoxConstraints(
                                             minWidth: 100,
-                                            minHeight: 50,
+                                            minHeight: 60,
                                           ),
                                           alignment: Alignment.center,
                                           child: Text(
@@ -182,7 +182,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                                                 : 'Send code',
                                             style: TextStyle(
                                               color: Colors.white,
-                                              fontSize: 16,
+                                              fontSize: 18,
                                             ),
                                           ),
                                         ),
