@@ -43,7 +43,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
     Future.microtask(() {
       ref
           .read(getRequestsStateNotifierProvider.notifier)
-          .getRequests('Accepted');
+          .getRequests('Accepted', false);
     });
   }
 

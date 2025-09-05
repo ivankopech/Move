@@ -42,6 +42,7 @@ class _TipDialogState extends ConsumerState<TipDialog> {
     FocusScope.of(context).unfocus(); // Cierra teclado
     double amount = 0;
     double percentage = 0;
+    bool noTip = false;
     if (selectedOption == 'Amount') {
       amount = double.tryParse(tipAmountController.text) ?? -1;
       if (amount <= 0) {
@@ -58,7 +59,7 @@ class _TipDialogState extends ConsumerState<TipDialog> {
 
     ref
         .read(setTipStateNotifierProvider.notifier)
-        .setTip(widget.id, percentage, amount);
+        .setTip(widget.id, percentage, amount, noTip);
     context.pop();
   }
 
@@ -167,7 +168,7 @@ class _TipDialogState extends ConsumerState<TipDialog> {
                 FocusScope.of(context).unfocus();
                 ref
                     .read(setTipStateNotifierProvider.notifier)
-                    .setTip(widget.id, 0.0, 0.0);
+                    .setTip(widget.id, 0.0, 0.0, true);
                 context.pop();
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),

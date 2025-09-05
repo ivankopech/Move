@@ -48,7 +48,7 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
     Future.microtask(() async {
       await ref
           .read(getRequestsStateNotifierProvider.notifier)
-          .getRequests('Finished');
+          .getRequests('Finished', true);
 
       await Future.delayed(Duration(milliseconds: 300));
 
@@ -222,7 +222,7 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
           if (result == true) {
             await ref
                 .read(getRequestsStateNotifierProvider.notifier)
-                .getRequests('Finished');
+                .getRequests('Finished', true);
           }
         }
       },
