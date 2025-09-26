@@ -66,6 +66,8 @@ final vehicleTypeUseCaseProvider = Provider<VehicleTypeUseCase>(
 //PROVIDERS
 final originAddressProvider = StateProvider<AddressModel?>((ref) => null);
 final destinationAddressProvider = StateProvider<AddressModel?>((ref) => null);
+final originPlaceId = StateProvider<String?>((ref) => null);
+final destinationPlaceId = StateProvider<String?>((ref) => null);
 final distanceProvider = StateProvider<Distance?>((ref) => null);
 final vehicleProvider = StateProvider<int?>((ref) => null);
 final imagesProvider = StateNotifierProvider<ImagesNotifier, ImagesModel>((
