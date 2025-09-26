@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/date_time_patterns.dart';
 import 'package:intl/intl.dart';
 import 'package:move/features/map/data/models/vehicle_type.dart';
 import 'package:move/features/map/presentation/providers/providers.dart';
@@ -203,22 +204,64 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
     );
   }
 
-  final List<String> timeSlots = List.generate(13, (index) {
-    final startHour = 8 + index;
-    final endHour = startHour + 1;
-    final start = DateFormat.jm().format(DateTime(0, 0, 0, startHour));
-    final end = DateFormat.jm().format(DateTime(0, 0, 0, endHour));
-    return 'between $start - $end';
-  });
+  List<String> generateTimeSlots(DateTime date) {
+    final now = DateTime.now();
 
-  final List<String> dateLabels = List.generate(7, (index) {
-    final date = DateTime.now().add(Duration(days: index));
-    if (index == 0) return "Today";
-    if (index == 1) return "Tomorrow";
-    return DateFormat('EEEE').format(date);
-  });
+    int startHour = 8;
+    int endHour = 20;
+
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
+      startHour = now.minute > 0 ? now.hour + 1 : now.hour;
+      if (startHour > endHour) return [];
+    }
+
+    if (date.weekday == DateTime.saturday) {
+      endHour = 12;
+    }
+
+    List<String> slots = [];
+    for (int hour = startHour; hour < endHour; hour++) {
+      final start = DateFormat.jm().format(
+        DateTime(date.year, date.month, date.day, hour),
+      );
+      final end = DateFormat.jm().format(
+        DateTime(date.year, date.month, date.day, hour + 1),
+      );
+      // final start = DateFormat.jm().format(DateTime(0, 0, 0, hour + 1));
+      // final end = DateFormat.jm().format(DateTime(0, 0, 0, hour + 2));
+      slots.add('Between $start - $end');
+    }
+
+    return slots;
+  }
+
+  List<String> generateDateLabels() {
+    final now = DateTime.now();
+    List<String> labels = [];
+
+    for (int i = 0; i < 7; i++) {
+      final date = now.add(Duration(days: i));
+
+      if (date.weekday == DateTime.sunday) continue;
+
+      if (i == 0) {
+        labels.add('Today');
+      } else if (i == 1) {
+        labels.add('Tomorrow');
+      } else {
+        labels.add(DateFormat('EEEE').format(date));
+      }
+    }
+    return labels;
+  }
 
   Widget datePicker() {
+    final dateLabels = generateDateLabels();
+    final selectedDate = getDateFromString(dateLabels[selectedDateIndex]);
+    final timeSlots = generateTimeSlots(selectedDate);
+
     return SafeArea(
       child: Column(
         children: [
@@ -235,6 +278,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
                     onSelectedItemChanged: (index) {
                       setState(() {
                         selectedDateIndex = index;
+                        selectedTimeIndex = 0;
                       });
                     },
                     childDelegate: ListWheelChildBuilderDelegate(
@@ -274,9 +318,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
                     },
                     childDelegate: ListWheelChildBuilderDelegate(
                       builder: (context, index) {
-                        if (index < 0 || index >= timeSlots.length) {
-                          return null;
-                        }
+                        if (index < 0 || index >= timeSlots.length) return null;
                         final isSelected = index == selectedTimeIndex;
                         return Center(
                           child: Text(
@@ -301,12 +343,11 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
           SizedBox(height: 30),
           ElevatedButton(
             onPressed: () async {
-              final rawDate = dateLabels[selectedDateIndex];
-              final time = timeSlots[selectedTimeIndex];
-
+              final rawDate = generateDateLabels()[selectedDateIndex];
               final date = getDateFromString(rawDate);
               final updatedDate = '${date.day}/${date.month}/${date.year}';
 
+              final time = timeSlots[selectedTimeIndex];
               final formattedTime = cleanTime(time);
               final dateISO = parseToISO8601(updatedDate);
 
