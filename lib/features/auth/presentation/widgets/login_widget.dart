@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -141,6 +142,15 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
                             const SizedBox(height: 16),
                           ],
                           SizedBox(height: 30),
+                          if (kDebugMode)
+                            ElevatedButton(
+                              onPressed: () async {
+                                await ref
+                                    .read(loginStateNotifierProvider.notifier)
+                                    .login('+3416381219', '463463');
+                              },
+                              child: Text('Fast Login'),
+                            ),
                           SizedBox(
                             width: double.infinity,
                             child:
