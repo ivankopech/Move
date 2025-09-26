@@ -6,6 +6,9 @@ import '../../domain/use_cases/user_data_use_case.dart';
 import '../../data/repositories/create_profile_repository_interface_implementation.dart';
 import '../../domain/repositories/create_profile_repository_interface.dart';
 import '../../domain/use_cases/create_profile_use_case.dart';
+import '../../data/repositories/device_token_interface_implementation.dart';
+import '../../domain/repositories/device_token_repository_interface.dart';
+import '../../domain/use_cases/device_token_use_case.dart';
 
 final userRepositoryInterfaceProvider = Provider<UserRepositoryInterface>((
   ref,
@@ -31,6 +34,22 @@ final createProfileUseCaseProvider = Provider<CreateProfileUseCase>(
   (ref) => CreateProfileUseCase(
     createProfileRepositoryInterface: ref.watch(
       createProfileRepositoryInterfaceProvider,
+    ),
+  ),
+);
+
+//DEVICE TOKEN
+final registerDeviceTokenRepositoryInterfaceProvider =
+    Provider<RegisterDeviceTokenRepositoryInterface>((ref) {
+      final apiClient = ref.read(apiClientProvider);
+      return RegisterDeviceTokenInterfaceImplementation(apiClient);
+    });
+
+// USE CASE PROVIDERS
+final registerDeviceTokenUseCaseProvider = Provider<RegisterDeviceTokenUseCase>(
+  (ref) => RegisterDeviceTokenUseCase(
+    registerDeviceTokenRepositoryInterface: ref.watch(
+      registerDeviceTokenRepositoryInterfaceProvider,
     ),
   ),
 );
