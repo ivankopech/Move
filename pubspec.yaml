@@ -59,6 +59,9 @@ dependencies:
   flutter_slidable: ^4.0.0
   intl: ^0.20.2
   permission_handler: ^12.0.1
+  fluttertoast: ^8.2.13
+  firebase_messaging: ^16.0.2
+  firebase_core: ^4.1.1
 
 dev_dependencies:
   flutter_test:
