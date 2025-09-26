@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:io' show Platform;
@@ -18,6 +19,7 @@ import './arrival_time.dart';
 import './tip_dialog.dart';
 
 import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
+import '../../../home/presentation/providers/device_token_state_notifier_provider.dart';
 
 class MapInputWidget extends ConsumerStatefulWidget {
   const MapInputWidget({super.key});
@@ -54,6 +56,7 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
 
       showTipDialog();
     });
+    sendPlatformAndToken();
   }
 
   Future<void> loadEnv() async {
@@ -281,6 +284,33 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
         }
       },
     );
+  }
+
+  void sendPlatformAndToken() async {
+    String? token;
+    final messaging = FirebaseMessaging.instance;
+    final String platform = Platform.isIOS ? 'apn' : 'fcm';
+
+    if (Platform.isIOS) {
+      final settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      if (settings.authorizationStatus != AuthorizationStatus.authorized) {
+        print("Permiso de notificaciones denegado");
+        return;
+      }
+      token = await messaging.getAPNSToken();
+      print('platform es: $platform y token es: $token');
+    } else if (Platform.isAndroid) {
+      token = await messaging.getToken();
+      print('platform es: $platform y token es: $token');
+    }
+
+    await ref
+        .read(registerDeviceTokenStateNotifierProvider.notifier)
+        .registerDeviceToken(platform, token);
   }
 
   @override
