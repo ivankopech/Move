@@ -7,6 +7,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/create_request_state_notifier_provider.dart';
 import '../../../home/presentation/screens/home_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SquarePaymentWidget extends ConsumerStatefulWidget {
   const SquarePaymentWidget({super.key});
@@ -80,6 +81,8 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
       final details = ref.watch(detailsProvider);
       final images = ref.watch(imagesProvider);
       final vehicleId = ref.watch(vehicleProvider);
+      final originId = ref.watch(originPlaceId);
+      final destinationId = ref.watch(destinationPlaceId);
 
       final payment = Payment(paymentMethodId: 1, token: token);
 
@@ -104,7 +107,7 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
           florNummberTo: '',
           stateTo: origin.state,
           descriptionTo: details.description,
-          placeIdTo: '',
+          placeIdTo: originId,
           latTo: origin.latitude,
           longTo: origin.longitude,
           longDirectionTo: '',
@@ -126,7 +129,7 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
           florNummberTo: '',
           stateTo: destination.state,
           descriptionTo: details.description,
-          placeIdTo: '',
+          placeIdTo: destinationId,
           latTo: destination.latitude,
           longTo: destination.longitude,
           longDirectionTo: '',
@@ -169,15 +172,37 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
             0,
           );
 
-      await controller.runJavaScript("""
-        document.getElementById("message").textContent = "✅ Request created successfully";
-        setTimeout(() => window.location.href = "success://home", 1000);
-      """);
+      await Fluttertoast.showToast(
+        msg: '✅ Request created successfully',
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 3,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: const Color.fromARGB(255, 103, 188, 107),
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+      context.go(HomeScreen.path);
+
+      // await controller.runJavaScript("""
+      //   document.getElementById("message").textContent = "✅ Request created successfully";
+      //   setTimeout(() => {
+      //     document.getElementById("message").classList.add("hide");
+      //   }, 3000);""");
       return true;
     } catch (e) {
-      await controller.runJavaScript("""
-      document.getElementById("message").textContent = "❌ Error al crear la solicitud.";
-    """);
+      await Fluttertoast.showToast(
+        msg: '❌ Error while creating request',
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 3,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: const Color.fromARGB(255, 203, 108, 108),
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      //   await controller.runJavaScript("""
+      //   document.getElementById("message").textContent = "❌ Error al crear la solicitud.";
+      // """);
       return false;
     } finally {
       await controller.runJavaScript(
@@ -190,42 +215,12 @@ class SquarePaymentWidgetState extends ConsumerState<SquarePaymentWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: Text('Insert a payment method')),
+      appBar: AppBar(
+        //title: Text('Insert a payment method'),
+        backgroundColor: Colors.white,
+      ),
       body: Column(
-        children: [
-          Expanded(child: WebViewWidget(controller: controller)),
-          if (token.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(left: 15, right: 15, bottom: 60),
-              child: ElevatedButton(
-                onPressed: () {
-                  context.go(HomeScreen.path);
-                },
-                style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.indigo, Colors.purple],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Container(
-                    constraints: const BoxConstraints(
-                      minWidth: 100,
-                      minHeight: 50,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      "Go back",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+        children: [Expanded(child: WebViewWidget(controller: controller))],
       ),
     );
   }

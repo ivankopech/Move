@@ -128,6 +128,11 @@ class _AddressInputState extends ConsumerState<AddressInput> {
     if (predictions.predictions.isEmpty) return;
 
     final prediction = predictions.predictions.first;
+    if (isOrigin) {
+      ref.read(originPlaceId.notifier).state = prediction.placeId;
+    } else {
+      ref.read(destinationPlaceId.notifier).state = prediction.placeId;
+    }
     final details = await places.fetchPlace(
       prediction.placeId,
       fields: [
