@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
@@ -12,25 +14,25 @@ class MapHelper {
 
     if (origin.isNotEmpty) {
       LatLng originLatLng = await getLatLngFromAddress(origin);
+      final originIcon = await createEmojiMarker('🏠');
       markers.add(
         Marker(
           markerId: const MarkerId('origin'),
           position: originLatLng,
           infoWindow: InfoWindow(title: "Origin: $origin"),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon: originIcon,
         ),
       );
     }
     if (destination.isNotEmpty) {
       LatLng destinationLatLng = await getLatLngFromAddress(destination);
+      final destinationIcon = await createEmojiMarker('🏁');
       markers.add(
         Marker(
           markerId: const MarkerId('destination'),
           position: destinationLatLng,
           infoWindow: InfoWindow(title: 'Destination: $destination'),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueGreen,
-          ),
+          icon: destinationIcon,
         ),
       );
     }
@@ -79,7 +81,7 @@ class MapHelper {
     try {
       List<Location> locations = await locationFromAddress(address);
       if (locations.isNotEmpty) {
-        print(
+        debugPrint(
           'lat: ${locations.first.latitude}, long ${locations.first.longitude}',
         );
         return LatLng(locations.first.latitude, locations.first.longitude);
@@ -88,5 +90,29 @@ class MapHelper {
       debugPrint('error getting coordinates for address: $e');
     }
     return const LatLng(-32.944242, -60.650538);
+  }
+
+  static Future<BitmapDescriptor> createEmojiMarker(String emoji) async {
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+
+    textPainter.text = TextSpan(
+      text: emoji,
+      style: const TextStyle(fontSize: 100),
+    );
+
+    textPainter.layout();
+    textPainter.paint(canvas, Offset.zero);
+
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(
+      textPainter.width.toInt(),
+      textPainter.height.toInt(),
+    );
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final uint8List = byteData!.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(uint8List);
   }
 }
