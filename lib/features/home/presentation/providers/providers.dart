@@ -1,4 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:move/config/api_client.dart';
+import 'package:move/features/home/data/repositories/push_message_repository_interface_implementation.dart';
+import 'package:move/features/home/domain/repositories/push_message_repository_interface.dart';
+import 'package:move/features/home/domain/use_cases/push_message_use_case.dart';
 import '../../../../config/api_client_provider.dart';
 import '../../data/repositories/user_repository_interface_implementation.dart';
 import '../../domain/repositories/user_repository_interface.dart';
@@ -50,6 +55,22 @@ final registerDeviceTokenUseCaseProvider = Provider<RegisterDeviceTokenUseCase>(
   (ref) => RegisterDeviceTokenUseCase(
     registerDeviceTokenRepositoryInterface: ref.watch(
       registerDeviceTokenRepositoryInterfaceProvider,
+    ),
+  ),
+);
+
+//SEND PUSH MESSAGE
+final sendPushMessageRepositoryProvider =
+    Provider<SendPushMessageRepositoryInterface>((ref) {
+      final apiClient = ref.read(apiClientProvider);
+      return SendPushMessageInterfaceImplementation(apiClient);
+    });
+
+// USE CASE PROVIDERS
+final sendPushMessageUseCaseProvider = Provider<SendPushMessageUseCase>(
+  (ref) => SendPushMessageUseCase(
+    sendPushMessageRepositoryInterface: ref.watch(
+      sendPushMessageRepositoryProvider,
     ),
   ),
 );
