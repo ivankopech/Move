@@ -14,7 +14,7 @@ class TrackRequestRepositoryInterfaceImplementation
   Future<Result<TrackRequestModel?>> trackRequest(int id) async {
     try {
       final response = await _apiClient.getData(
-        'services/app/Solicitud/GetTracking/$id?skipCount=0&maxResultCount=1',
+        'services/app/Solicitud/GetTracking/$id?skipCount=0&maxResultCount=100',
         (json) => TrackRequestModel.fromJson(json),
       );
       return response.fold((error) => Left(error), (data) async {
