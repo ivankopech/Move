@@ -11,3 +11,30 @@ final getRequestsStateNotifierProvider = StateNotifierProvider<
     getRequestsDataUseCase: ref.read(getRequestsDataUseCaseProvider),
   );
 });
+
+final openRequestsCount = Provider<int>((ref) {
+  final state = ref.watch(getRequestsStateNotifierProvider);
+  return state.when(
+    data: (requests) => requests.where((r) => r?.estado == "Open").length,
+    error: (_, _) => 0,
+    loading: () => 0,
+  );
+});
+
+final acceptedRequestsCount = Provider<int>((ref) {
+  final state = ref.watch(getRequestsStateNotifierProvider);
+  return state.when(
+    data: (requests) => requests.where((r) => r?.estado == "Assigned").length,
+    error: (_, _) => 0,
+    loading: () => 0,
+  );
+});
+
+final finishedRequestsCount = Provider<int>((ref) {
+  final state = ref.watch(getRequestsStateNotifierProvider);
+  return state.when(
+    data: (requests) => requests.where((r) => r?.estado == "Finished").length,
+    error: (_, _) => 0,
+    loading: () => 0,
+  );
+});
