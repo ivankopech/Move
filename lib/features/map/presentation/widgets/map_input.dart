@@ -20,6 +20,7 @@ import './tip_dialog.dart';
 
 import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
 import '../../../home/presentation/providers/device_token_state_notifier_provider.dart';
+import '../../../home/presentation/providers/push_message_state_notifier_provider.dart';
 
 class MapInputWidget extends ConsumerStatefulWidget {
   const MapInputWidget({super.key});
@@ -50,13 +51,26 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
     Future.microtask(() async {
       await ref
           .read(getRequestsStateNotifierProvider.notifier)
-          .getRequests('Finished', true);
+          .getRequests(true);
 
       await Future.delayed(Duration(milliseconds: 300));
 
-      showTipDialog();
+      final requests = ref.read(getRequestsStateNotifierProvider).value ?? [];
+      final finishedWithNoTip =
+          requests.where((r) => r?.estado == 'Finished').toList();
+
+      if (finishedWithNoTip.isNotEmpty) showTipDialog();
     });
-    sendPlatformAndToken();
+
+    Future.delayed(const Duration(seconds: 4), () {
+      sendPlatformAndToken();
+    });
+  }
+
+  @override
+  void dispose() {
+    mapController?.dispose();
+    super.dispose();
   }
 
   Future<void> loadEnv() async {
@@ -195,10 +209,7 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
     final finishedRequests = ref.read(getRequestsStateNotifierProvider);
     finishedRequests.when(
       data: (request) async {
-        final toPrompt =
-            request
-                .where((r) => r?.tipAmount == 0.0 && r?.tipPercent == 0.0)
-                .toList();
+        final toPrompt = request.where((r) => r?.estado == 'Finished').toList();
 
         if (toPrompt.isEmpty) return;
 
@@ -225,7 +236,7 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
           if (result == true) {
             await ref
                 .read(getRequestsStateNotifierProvider.notifier)
-                .getRequests('Finished', true);
+                .getRequests(true);
           }
         }
       },
@@ -304,6 +315,15 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
       token = await messaging.getAPNSToken();
       print('platform es: $platform y token es: $token');
     } else if (Platform.isAndroid) {
+      final settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      if (settings.authorizationStatus != AuthorizationStatus.authorized) {
+        print("Permiso de notificaciones denegado");
+        return;
+      }
       token = await messaging.getToken();
       print('platform es: $platform y token es: $token');
     }
@@ -311,12 +331,14 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
     await ref
         .read(registerDeviceTokenStateNotifierProvider.notifier)
         .registerDeviceToken(platform, token);
+
+    await ref
+        .read(sendPushMessageStateNotifierProvider.notifier)
+        .sendPushMessage();
   }
 
   @override
   Widget build(BuildContext context) {
-    final finishedRequests = ref.watch(getRequestsStateNotifierProvider);
-
     return Scaffold(
       drawer: const AppDrawer(),
       body:
@@ -348,15 +370,17 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
                       },
                     ),
                   ),
-                  Positioned(
-                    top: MediaQuery.of(context).size.height / 2 - 24,
-                    left: MediaQuery.of(context).size.width / 2 - 24,
-                    child: const Icon(
-                      Icons.location_on,
-                      size: 60,
-                      color: Colors.indigo,
+                  if (markers.isEmpty)
+                    Positioned(
+                      top: MediaQuery.of(context).size.height / 2 - 24,
+                      left: MediaQuery.of(context).size.width / 2 - 24,
+                      child: const Icon(
+                        Icons.location_on,
+                        size: 60,
+                        color: Colors.indigo,
+                      ),
                     ),
-                  ),
+
                   Positioned(
                     top: 70,
                     left: 15,
