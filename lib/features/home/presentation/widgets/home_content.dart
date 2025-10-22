@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:move/features/home/presentation/widgets/app_drawer.dart';
-import '../../../../common/widgets/loader_widget.dart';
 import '../../../../common/widgets/generic_error_screen.dart';
 import '../providers/user_state_notifier_provider.dart';
 import '../../../../utils/utils.dart';
@@ -12,6 +10,7 @@ import '../providers/create_profile_state_notifier_provider.dart';
 import 'inputs.dart';
 import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
 import '../../../requests/presentation/screens/get_requests_screen.dart';
+import '../../../map/presentation/screens/map_input.dart';
 
 class HomeContent extends ConsumerStatefulWidget {
   const HomeContent({super.key});
@@ -41,9 +40,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
       }
     });
     Future.microtask(() {
-      ref
-          .read(getRequestsStateNotifierProvider.notifier)
-          .getRequests('Accepted', false);
+      ref.read(getRequestsStateNotifierProvider.notifier).getRequests(false);
     });
   }
 
@@ -125,142 +122,184 @@ class _HomeContentState extends ConsumerState<HomeContent> {
     );
   }
 
+  Widget buildRequestRow(
+    BuildContext context, {
+    required String title,
+    required int count,
+    required Color color,
+    required IconData icon,
+    required VoidCallback onPressed,
+    bool isLoading = false,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: ListTile(
+              leading: Icon(icon, color: color),
+              title: Text(title),
+              trailing: CircleAvatar(
+                backgroundColor: color.withOpacity(0.1),
+                child:
+                    isLoading
+                        ? CircularProgressIndicator()
+                        : Text(
+                          count.toString(),
+                          style: TextStyle(color: color),
+                        ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        IconButton(
+          onPressed: onPressed,
+          style: IconButton.styleFrom(
+            backgroundColor: color,
+            foregroundColor: Colors.white,
+            shape: const CircleBorder(),
+          ),
+          icon: Icon(Icons.remove_red_eye_sharp),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userStateNotifierProvider);
     final requestState = ref.watch(getRequestsStateNotifierProvider);
     final requests = requestState.value ?? [];
+    final openCount = ref.watch(openRequestsCount);
+    final acceptedCount = ref.watch(acceptedRequestsCount);
+    final finishedCount = ref.watch(finishedRequestsCount);
 
-    return userState.when(
-      data: (user) {
-        final name =
-            ref
-                .read(userStateNotifierProvider.notifier)
-                .userResponseModel
-                ?.name ??
-            '';
-        final surname =
-            ref
-                .read(userStateNotifierProvider.notifier)
-                .userResponseModel
-                ?.surname ??
-            '';
-        return Scaffold(
-          appBar: AppBar(),
-          drawer: AppDrawer(),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              Text(
-                'Welcome back, $name!',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 35, fontWeight: FontWeight.w300),
-              ),
+    return Scaffold(
+      appBar: AppBar(),
+      drawer: AppDrawer(),
 
-              SizedBox(height: 20),
-              if (requests.isNotEmpty) ...[
-                GestureDetector(
-                  onTap: () => context.pushNamed(GetRequestsScreen.name),
-                  child: SizedBox(
-                    height: 500,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: requests.length,
-                      itemBuilder: (context, index) {
-                        final request = requests[index];
-                        final date = request!.fechaViaje;
-                        final id = request.id;
-                        DateTime dateTime = DateTime.parse(date.toString());
-                        String requestDate = DateFormat(
-                          'dd/MM/yyyy',
-                        ).format(dateTime);
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 15,
-                            vertical: 5,
-                          ),
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'ID: $id',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      requestDate,
-                                      style: TextStyle(color: Colors.grey[600]),
-                                    ),
-                                  ],
-                                ),
-                                //SizedBox(height: 8),
-                                Text(
-                                  'Origin: ${request.calleDesde} ${request.numeroDesde}',
-                                ),
-                                Text(
-                                  'Destination: ${request.calleHasta} ${request.numeroHasta}',
-                                ),
-                                SizedBox(height: 8),
+      body: userState.when(
+        data: (user) {
+          final name =
+              ref
+                  .read(userStateNotifierProvider.notifier)
+                  .userResponseModel
+                  ?.name ??
+              '';
+          final surname =
+              ref
+                  .read(userStateNotifierProvider.notifier)
+                  .userResponseModel
+                  ?.surname ??
+              '';
 
-                                // Status
-                                Text(
-                                  'Status: ${request.estado}',
-                                  style: TextStyle(color: Colors.blue),
-                                ),
-                              ],
-                            ),
-                          ),
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (name == surname) ...[
+                    TextButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => showInputDialog(),
                         );
                       },
+                      child: Text(
+                        'Press here to complete your personal information',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Welcome back, Ivan! 👋",
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            "Requests overview",
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          context.pushReplacementNamed(MapInputScreen.name);
+                        },
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.deepPurpleAccent,
+                          foregroundColor: Colors.white,
+                          shape: const CircleBorder(),
+                        ),
+                        icon: const Icon(Icons.add),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
+                  buildRequestRow(
+                    context,
+                    title: 'Requested',
+                    count: openCount,
+                    color: Colors.deepPurpleAccent,
+                    icon: Icons.pending_actions_rounded,
+                    onPressed:
+                        () =>
+                            context.pushNamed(GetRequestsScreen.name, extra: 0),
+                    isLoading: requestState.isLoading,
+                  ),
+                  const SizedBox(height: 10),
+                  buildRequestRow(
+                    context,
+                    title: 'Accepted',
+                    count: acceptedCount,
+                    color: Colors.deepPurpleAccent,
+                    icon: Icons.pending_actions_rounded,
+                    onPressed:
+                        () =>
+                            context.pushNamed(GetRequestsScreen.name, extra: 1),
+                    isLoading: requestState.isLoading,
+                  ),
+                  const SizedBox(height: 10),
+                  buildRequestRow(
+                    context,
+                    title: 'Finished',
+                    count: finishedCount,
+                    color: Colors.deepPurpleAccent,
+                    icon: Icons.pending_actions_rounded,
+                    onPressed:
+                        () =>
+                            context.pushNamed(GetRequestsScreen.name, extra: 2),
+                    isLoading: requestState.isLoading,
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: appImage(AppAssets.loginJeet),
                     ),
                   ),
-                ),
-              ] else ...[
-                const Center(
-                  child: Text('You currently have no accepted requests'),
-                ),
-              ],
-
-              SizedBox(height: 20),
-              if (name == surname) ...[
-                TextButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => showInputDialog(),
-                    );
-                  },
-                  child: Text(
-                    'Press here to complete your personal information',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: appImage(AppAssets.loginJeet),
-                ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
-      error: (error, _) => GenericErrorScreen(onRetry: onRetry),
-      loading: () => const LoaderWidget(),
+            ),
+          );
+        },
+        error: (error, _) => GenericErrorScreen(onRetry: onRetry),
+        loading: () => Center(child: const CircularProgressIndicator()),
+      ),
     );
   }
 }
