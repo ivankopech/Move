@@ -42,7 +42,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: GetRequestsScreen.path,
         name: GetRequestsScreen.name,
-        builder: (context, state) => const GetRequestsScreen(),
+        builder: (context, state) {
+          final initialIndex = state.extra as int? ?? 0;
+          return GetRequestsScreen(initialIndex: initialIndex);
+        },
       ),
       GoRoute(
         path: TrackRequestScreen.path,
