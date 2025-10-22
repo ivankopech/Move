@@ -229,8 +229,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
       final end = DateFormat.jm().format(
         DateTime(date.year, date.month, date.day, hour + 1),
       );
-      // final start = DateFormat.jm().format(DateTime(0, 0, 0, hour + 1));
-      // final end = DateFormat.jm().format(DateTime(0, 0, 0, hour + 2));
+
       slots.add('Between $start - $end');
     }
 
@@ -251,7 +250,7 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
       } else if (i == 1) {
         labels.add('Tomorrow');
       } else {
-        labels.add(DateFormat('EEEE').format(date));
+        labels.add(DateFormat('EEEE d').format(date));
       }
     }
     return labels;
@@ -388,32 +387,43 @@ class _ArrivalTimeState extends ConsumerState<ArrivalTime> {
 
   DateTime getDateFromString(String dateString) {
     final now = DateTime.now();
+    final lower = dateString.toLowerCase();
 
-    switch (dateString.toLowerCase()) {
-      case 'today':
-        return now;
-      case 'tomorrow':
-        return now.add(Duration(days: 1));
-      default:
-        // En caso de que el valor sea un día de la semana: "Wednesday", "Thursday", etc.
-        final weekdays = {
-          'monday': DateTime.monday,
-          'tuesday': DateTime.tuesday,
-          'wednesday': DateTime.wednesday,
-          'thursday': DateTime.thursday,
-          'friday': DateTime.friday,
-          'saturday': DateTime.saturday,
-          'sunday': DateTime.sunday,
-        };
-
-        final targetWeekday = weekdays[dateString.toLowerCase()];
-        if (targetWeekday == null) return now;
-
-        int daysToAdd = (targetWeekday - now.weekday) % 7;
-        daysToAdd = daysToAdd == 0 ? 7 : daysToAdd;
-
-        return now.add(Duration(days: daysToAdd));
+    if (lower == 'today') {
+      return DateTime(now.year, now.month, now.day);
     }
+    if (lower == 'tomorrow') {
+      final t = now.add(Duration(days: 1));
+      return DateTime(t.year, t.month, t.day);
+    }
+
+    for (int i = 0; i < 14; i++) {
+      final d = now.add(Duration(days: i));
+      final label = DateFormat('EEEE d').format(d);
+      if (label.toLowerCase() == lower) {
+        return DateTime(d.year, d.month, d.day);
+      }
+    }
+
+    final weekdays = {
+      'monday': DateTime.monday,
+      'tuesday': DateTime.tuesday,
+      'wednesday': DateTime.wednesday,
+      'thursday': DateTime.thursday,
+      'friday': DateTime.friday,
+      'saturday': DateTime.saturday,
+      'sunday': DateTime.sunday,
+    };
+
+    final firstToken = dateString.split(' ').first.toLowerCase();
+    final targetWeekday = weekdays[firstToken];
+    if (targetWeekday != null) {
+      int daysToAdd = (targetWeekday - now.weekday) % 7;
+      daysToAdd = daysToAdd == 0 ? 7 : daysToAdd;
+      final d = now.add(Duration(days: daysToAdd));
+      return DateTime(d.year, d.month, d.day);
+    }
+    return DateTime(now.year, now.month, now.day);
   }
 
   String cleanTime(String timeString) {
