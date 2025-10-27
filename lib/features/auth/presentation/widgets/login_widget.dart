@@ -46,13 +46,17 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
 
   Future<void> handleLogin() async {
     setState(() {
+      isVerifying = true;
       code = codeController.text.trim();
     });
     if (code.isEmpty) return;
 
     try {
       await ref.read(loginStateNotifierProvider.notifier).login(number, code);
-    } catch (e) {}
+    } catch (e) {
+    } finally {
+      setState(() => isVerifying = false);
+    }
   }
 
   @override
