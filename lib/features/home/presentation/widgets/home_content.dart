@@ -11,6 +11,7 @@ import 'inputs.dart';
 import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
 import '../../../requests/presentation/screens/get_requests_screen.dart';
 import '../../../map/presentation/screens/map_input.dart';
+import './delivery_card.dart';
 
 class HomeContent extends ConsumerStatefulWidget {
   const HomeContent({super.key});
@@ -176,6 +177,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
     final openCount = ref.watch(openRequestsCount);
     final acceptedCount = ref.watch(acceptedRequestsCount);
     final finishedCount = ref.watch(finishedRequestsCount);
+    final inProgressRequests = requests.where((r) => r?.estado == 'InProgress');
 
     return Scaffold(
       appBar: AppBar(),
@@ -199,100 +201,130 @@ class _HomeContentState extends ConsumerState<HomeContent> {
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (name == surname) ...[
-                    TextButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => showInputDialog(),
-                        );
-                      },
-                      child: Text(
-                        'Press here to complete your personal information',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Welcome back, Ivan! 👋",
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            "Requests overview",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      IconButton(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (name == surname) ...[
+                      TextButton(
                         onPressed: () {
-                          context.pushReplacementNamed(MapInputScreen.name);
+                          showDialog(
+                            context: context,
+                            builder: (context) => showInputDialog(),
+                          );
                         },
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.deepPurpleAccent,
-                          foregroundColor: Colors.white,
-                          shape: const CircleBorder(),
+                        child: Text(
+                          'Press here to complete your personal information',
+                          textAlign: TextAlign.center,
                         ),
-                        icon: const Icon(Icons.add),
                       ),
                     ],
-                  ),
-
-                  const SizedBox(height: 30),
-                  buildRequestRow(
-                    context,
-                    title: 'Requested',
-                    count: openCount,
-                    color: Colors.deepPurpleAccent,
-                    icon: Icons.pending_actions_rounded,
-                    onPressed:
-                        () =>
-                            context.pushNamed(GetRequestsScreen.name, extra: 0),
-                    isLoading: requestState.isLoading,
-                  ),
-                  const SizedBox(height: 10),
-                  buildRequestRow(
-                    context,
-                    title: 'Accepted',
-                    count: acceptedCount,
-                    color: Colors.deepPurpleAccent,
-                    icon: Icons.pending_actions_rounded,
-                    onPressed:
-                        () =>
-                            context.pushNamed(GetRequestsScreen.name, extra: 1),
-                    isLoading: requestState.isLoading,
-                  ),
-                  const SizedBox(height: 10),
-                  buildRequestRow(
-                    context,
-                    title: 'Finished',
-                    count: finishedCount,
-                    color: Colors.deepPurpleAccent,
-                    icon: Icons.pending_actions_rounded,
-                    onPressed:
-                        () =>
-                            context.pushNamed(GetRequestsScreen.name, extra: 2),
-                    isLoading: requestState.isLoading,
-                  ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: appImage(AppAssets.loginJeet),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Welcome back, Ivan! 👋",
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              "Requests overview",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            context.pushReplacementNamed(MapInputScreen.name);
+                          },
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.deepPurpleAccent,
+                            foregroundColor: Colors.white,
+                            shape: const CircleBorder(),
+                          ),
+                          icon: const Icon(Icons.add),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 30),
+                    buildRequestRow(
+                      context,
+                      title: 'Requested',
+                      count: openCount,
+                      color: Colors.deepPurpleAccent,
+                      icon: Icons.pending_actions_rounded,
+                      onPressed:
+                          () => context.pushNamed(
+                            GetRequestsScreen.name,
+                            extra: 0,
+                          ),
+                      isLoading: requestState.isLoading,
+                    ),
+                    const SizedBox(height: 10),
+                    buildRequestRow(
+                      context,
+                      title: 'Accepted',
+                      count: acceptedCount,
+                      color: Colors.deepPurpleAccent,
+                      icon: Icons.pending_actions_rounded,
+                      onPressed:
+                          () => context.pushNamed(
+                            GetRequestsScreen.name,
+                            extra: 1,
+                          ),
+                      isLoading: requestState.isLoading,
+                    ),
+                    const SizedBox(height: 10),
+                    buildRequestRow(
+                      context,
+                      title: 'Finished',
+                      count: finishedCount,
+                      color: Colors.deepPurpleAccent,
+                      icon: Icons.pending_actions_rounded,
+                      onPressed:
+                          () => context.pushNamed(
+                            GetRequestsScreen.name,
+                            extra: 2,
+                          ),
+                      isLoading: requestState.isLoading,
+                    ),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      child:
+                          inProgressRequests.isEmpty
+                              ? const SizedBox.shrink()
+                              : Column(
+                                key: ValueKey(inProgressRequests.length),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    'Active deliveries',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepPurpleAccent,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  ...inProgressRequests.map(
+                                    (r) => DeliveryCard(requestModel: r!),
+                                  ),
+                                ],
+                              ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
