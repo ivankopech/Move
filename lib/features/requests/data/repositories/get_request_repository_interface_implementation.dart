@@ -16,7 +16,7 @@ class GetRequestRepositoryInterfaceImplementation
   }) async {
     try {
       final response = await apiClient.getData(
-        'services/app/Solicitud/GetSolicitudes/GetAll?WithNoTip=$noTip&MaxResultCount=500',
+        'services/app/Solicitud/GetSolicitudes/GetAll?WithNoTip=$noTip&MaxResultCount=100',
         (json) {
           final result = GetRequestsModelResponse.fromJson(json['result']);
           var list = result.items;
