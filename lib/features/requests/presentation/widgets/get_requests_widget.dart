@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:move/features/home/presentation/widgets/app_drawer.dart';
 import '../../../../common/widgets/generic_error_screen.dart';
 import '../providers/get_requests_state_notifier_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../screens/track_request_screen.dart';
 import './row_details.dart';
 
 class GetRequestsWidget extends ConsumerStatefulWidget {
@@ -194,15 +192,6 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
                                         },
                                       );
                                     },
-                                  ),
-                                  SlidableAction(
-                                    onPressed: (context) {
-                                      context.pushNamed(
-                                        TrackRequestScreen.name,
-                                        extra: id,
-                                      );
-                                    },
-                                    icon: Icons.location_on_outlined,
                                   ),
                                 ],
                               ),
