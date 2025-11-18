@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -99,7 +100,7 @@ class MapHelper {
 
     textPainter.text = TextSpan(
       text: emoji,
-      style: const TextStyle(fontSize: 100),
+      style: const TextStyle(fontSize: 30),
     );
 
     textPainter.layout();
@@ -113,6 +114,6 @@ class MapHelper {
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final uint8List = byteData!.buffer.asUint8List();
 
-    return BitmapDescriptor.fromBytes(uint8List);
+    return BitmapDescriptor.bytes(uint8List);
   }
 }
