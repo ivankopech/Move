@@ -21,8 +21,8 @@ class ApiClient {
     _dio
       ..options = BaseOptions(
         baseUrl: dotenv.env['BASEURL'] ?? '',
-        connectTimeout: const Duration(seconds: 20),
-        receiveTimeout: const Duration(seconds: 20),
+        connectTimeout: const Duration(seconds: 40),
+        receiveTimeout: const Duration(seconds: 40),
         headers: {'Content-Type': 'application/json'},
       )
       ..interceptors.add(
