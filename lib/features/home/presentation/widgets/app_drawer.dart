@@ -22,7 +22,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.home),
             title: const Text('Home'),
             onTap: () {
-              context.pushReplacementNamed(HomeScreen.name);
+              context.go(HomeScreen.path);
             },
           ),
           const Divider(),
