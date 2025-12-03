@@ -12,11 +12,12 @@ class GetRequestRepositoryInterfaceImplementation
 
   @override
   Future<Result<List<GetRequestsModel?>>> getRequests({
+    required int id,
     required bool noTip,
   }) async {
     try {
       final response = await apiClient.getData(
-        'services/app/Solicitud/GetSolicitudes/GetAll?WithNoTip=$noTip&MaxResultCount=100',
+        'services/app/Solicitud/GetSolicitudes/GetAll?UserId=$id&WithNoTip=$noTip&MaxResultCount=100',
         (json) {
           final result = GetRequestsModelResponse.fromJson(json['result']);
           var list = result.items;

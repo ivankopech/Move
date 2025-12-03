@@ -8,7 +8,14 @@ class GetRequestsDataUseCase {
 
   GetRequestsDataUseCase({required this.getRequestsRepositoryInterface});
 
-  Future<Either<ApiException, List<GetRequestsModel?>>> call(bool noTip) async {
-    return getRequestsRepositoryInterface.getRequests(noTip: noTip);
+  Future<Either<ApiException, List<GetRequestsModel?>>> call(
+    int id,
+    bool noTip,
+  ) async {
+    final result = await getRequestsRepositoryInterface.getRequests(
+      id: id,
+      noTip: noTip,
+    );
+    return result.fold((error) => Left(error), (data) => Right(data));
   }
 }

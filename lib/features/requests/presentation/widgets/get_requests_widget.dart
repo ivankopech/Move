@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:move/features/home/presentation/widgets/app_drawer.dart';
 import '../../../../common/widgets/generic_error_screen.dart';
 import '../providers/get_requests_state_notifier_provider.dart';
+import '../../../auth/presentation/providers/login_state_notifier_provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import './row_details.dart';
 
@@ -17,6 +18,7 @@ class GetRequestsWidget extends ConsumerStatefulWidget {
 
 class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
     with SingleTickerProviderStateMixin {
+  int? userId;
   late TabController tabController;
 
   final estados = ['Open', 'Assigned', 'Finished'];
@@ -29,7 +31,15 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
       initialIndex: widget.initialIndex,
     );
     Future.microtask(() {
-      ref.read(getRequestsStateNotifierProvider.notifier).getRequests(false);
+      userId =
+          ref
+              .read(loginStateNotifierProvider.notifier)
+              .authResponseModel!
+              .result!
+              .userId;
+      ref
+          .read(getRequestsStateNotifierProvider.notifier)
+          .getRequests(userId!, false);
     });
 
     tabController.addListener(() {
