@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io';
 import 'package:go_router/go_router.dart';
 import 'package:move/features/home/presentation/widgets/app_drawer.dart';
+import 'package:move/features/requests/data/models/get_requests_model.dart';
 import '../../../../common/widgets/generic_error_screen.dart';
 import '../providers/user_state_notifier_provider.dart';
-import '../../../../utils/utils.dart';
 import '../../../auth/presentation/providers/login_state_notifier_provider.dart';
 import '../providers/create_profile_state_notifier_provider.dart';
 import 'inputs.dart';
@@ -12,6 +13,7 @@ import '../../../requests/presentation/providers/get_requests_state_notifier_pro
 import '../../../requests/presentation/screens/get_requests_screen.dart';
 import '../../../map/presentation/screens/map_input.dart';
 import './delivery_card.dart';
+import 'package:flutter/services.dart';
 
 class HomeContent extends ConsumerStatefulWidget {
   const HomeContent({super.key});
@@ -25,30 +27,70 @@ class _HomeContentState extends ConsumerState<HomeContent> {
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController surnameController = TextEditingController();
+  static const MethodChannel activityChannel = MethodChannel(
+    'live_activity_channel',
+  );
+  late ProviderSubscription<AsyncValue<List<GetRequestsModel?>>> subscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      userId =
-          ref
-              .read(loginStateNotifierProvider.notifier)
-              .authResponseModel
-              ?.result
-              ?.userId;
-      if (userId != null) {
-        ref.read(userStateNotifierProvider.notifier).getUserData(userId!);
-      }
-    });
-    Future.microtask(() {
-      ref.read(getRequestsStateNotifierProvider.notifier).getRequests(false);
+      loadData();
+      liveActivity();
     });
   }
 
   void onRetry() {
     if (userId != null) {
       ref.read(userStateNotifierProvider.notifier).getUserData(userId!);
+      ref
+          .read(getRequestsStateNotifierProvider.notifier)
+          .getRequests(userId!, false);
     }
+  }
+
+  Future<void> loadData() async {
+    if (!mounted) return;
+    userId =
+        ref
+            .read(loginStateNotifierProvider.notifier)
+            .authResponseModel
+            ?.result
+            ?.userId;
+    if (userId != null) {
+      ref.read(userStateNotifierProvider.notifier).getUserData(userId!);
+      ref
+          .read(getRequestsStateNotifierProvider.notifier)
+          .getRequests(userId!, false);
+    }
+  }
+
+  void liveActivity() {
+    subscription = ref.listenManual(getRequestsStateNotifierProvider, (
+      previous,
+      next,
+    ) async {
+      if (!Platform.isIOS) return;
+
+      final requests = next.value ?? [];
+
+      final inProgress =
+          requests
+              .where(
+                (r) => r?.estado == 'InProgress' && r!.tracking!.isNotEmpty,
+              )
+              .toList();
+
+      if (inProgress.isNotEmpty) {
+        final req = inProgress.first!;
+        final destinationAddress =
+            '${req.calleHasta ?? ''} ${req.numeroHasta ?? ''}';
+        await startLiveActivity(id: req.id!, destination: destinationAddress);
+      } else {
+        await stopLiveActivity();
+      }
+    });
   }
 
   Widget showInputDialog() {
@@ -126,7 +168,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
   Widget buildRequestRow(
     BuildContext context, {
     required String title,
-    required int count,
+    required int? count,
     required Color color,
     required IconData icon,
     required VoidCallback onPressed,
@@ -145,7 +187,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
               trailing: CircleAvatar(
                 backgroundColor: color.withOpacity(0.1),
                 child:
-                    isLoading
+                    isLoading || count == null
                         ? CircularProgressIndicator()
                         : Text(
                           count.toString(),
@@ -169,29 +211,75 @@ class _HomeContentState extends ConsumerState<HomeContent> {
     );
   }
 
+  Future<void> startLiveActivity({
+    required int id,
+    required String destination,
+  }) async {
+    if (!Platform.isIOS) return;
+    try {
+      await activityChannel.invokeMethod('startActivity', {
+        'id': id,
+        'destination': destination,
+      });
+    } catch (e) {
+      debugPrint("Error starting activity: $e");
+    }
+  }
+
+  Future<void> stopLiveActivity() async {
+    if (!Platform.isIOS) return;
+    try {
+      await activityChannel.invokeMethod('stopActivity');
+    } catch (e) {
+      debugPrint("Error stopping activity: $e");
+    }
+  }
+
+  int countByStatus(List<GetRequestsModel?> requests, String status) {
+    return requests.where((r) => r?.estado == status).length;
+  }
+
+  List<GetRequestsModel> activeDeliveries(List<GetRequestsModel?> requests) {
+    return requests
+        .where(
+          (r) => r?.estado == 'InProgress' && r?.tracking?.isNotEmpty == true,
+        )
+        .map((r) => r!)
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    subscription.close();
+    emailController.dispose();
+    nameController.dispose();
+    surnameController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final userState = ref.watch(userStateNotifierProvider);
     final requestState = ref.watch(getRequestsStateNotifierProvider);
-    final requests = requestState.value ?? [];
-    final openCount = ref.watch(openRequestsCount);
-    final acceptedCount = ref.watch(acceptedRequestsCount);
-    final finishedCount = ref.watch(finishedRequestsCount);
-    final inProgressRequests = requests.where((r) => r?.estado == 'InProgress');
 
     return Scaffold(
       appBar: AppBar(),
       drawer: AppDrawer(),
 
-      body: userState.when(
-        data: (user) {
-          final name =
+      body: requestState.when(
+        data: (requests) {
+          final openCount = countByStatus(requests, 'Open');
+          final acceptedCount = countByStatus(requests, 'Assigned');
+          final finishedCount = countByStatus(requests, 'Finished');
+
+          final activeList = activeDeliveries(requests);
+
+          String name =
               ref
                   .read(userStateNotifierProvider.notifier)
                   .userResponseModel
                   ?.name ??
               '';
-          final surname =
+          String surname =
               ref
                   .read(userStateNotifierProvider.notifier)
                   .userResponseModel
@@ -226,7 +314,9 @@ class _HomeContentState extends ConsumerState<HomeContent> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Welcome back, Ivan! 👋",
+                              name == surname
+                                  ? 'Welcome back! 👋'
+                                  : 'Welcome back, $name! 👋',
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -301,10 +391,22 @@ class _HomeContentState extends ConsumerState<HomeContent> {
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
                       child:
-                          inProgressRequests.isEmpty
-                              ? const SizedBox.shrink()
+                          activeList.isEmpty
+                              ? SizedBox(
+                                height: 300,
+                                child: Center(
+                                  child: Text(
+                                    'You currently have no active deliveries...',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepPurpleAccent,
+                                    ),
+                                  ),
+                                ),
+                              )
                               : Column(
-                                key: ValueKey(inProgressRequests.length),
+                                key: ValueKey(activeList.length),
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const SizedBox(height: 20),
@@ -317,8 +419,8 @@ class _HomeContentState extends ConsumerState<HomeContent> {
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-                                  ...inProgressRequests.map(
-                                    (r) => DeliveryCard(requestModel: r!),
+                                  ...activeList.map(
+                                    (r) => DeliveryCard(requestModel: r),
                                   ),
                                 ],
                               ),
@@ -330,7 +432,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
           );
         },
         error: (error, _) => GenericErrorScreen(onRetry: onRetry),
-        loading: () => Center(child: const CircularProgressIndicator()),
+        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }

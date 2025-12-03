@@ -218,17 +218,40 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 5),
-              Text(
-                '${widget.requestsModel.calleDesde} ${widget.requestsModel.numeroDesde}, ${widget.requestsModel.tramos![0].direccion!.city}',
+              RichText(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.black54),
+                text: TextSpan(
+                  style: const TextStyle(color: Colors.black),
+                  children: [
+                    const TextSpan(
+                      text: 'FROM: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text:
+                          '${widget.requestsModel.calleDesde} ${widget.requestsModel.numeroDesde}, ${widget.requestsModel.tramos![0].direccion!.city}',
+                    ),
+                  ],
+                ),
               ),
-              Text(
-                '${widget.requestsModel.calleHasta} ${widget.requestsModel.numeroHasta}, ${widget.requestsModel.tramos![1].direccion!.city}',
+              SizedBox(height: 5),
+              RichText(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.black54),
+                text: TextSpan(
+                  style: const TextStyle(color: Colors.black),
+                  children: [
+                    const TextSpan(
+                      text: 'TO: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(
+                      text:
+                          '${widget.requestsModel.calleHasta} ${widget.requestsModel.numeroHasta}, ${widget.requestsModel.tramos![1].direccion!.city}',
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
