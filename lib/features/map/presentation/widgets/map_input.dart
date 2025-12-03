@@ -1,12 +1,14 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, exit;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:move/common/widgets/loader_widget.dart';
 import '/features/map/presentation/screens/address_input.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +23,7 @@ import './tip_dialog.dart';
 import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
 import '../../../home/presentation/providers/device_token_state_notifier_provider.dart';
 import '../../../home/presentation/providers/push_message_state_notifier_provider.dart';
+import '../../../auth/presentation/providers/login_state_notifier_provider.dart';
 
 class MapInputWidget extends ConsumerStatefulWidget {
   const MapInputWidget({super.key});
@@ -42,29 +45,42 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
   String apiKey = dotenv.env['API_KEY'] ?? '';
   bool showInputSheet = true;
   bool hasShownDialog = false;
+  int? userId;
 
   @override
   void initState() {
     super.initState();
     currentLocation();
     loadEnv();
-    Future.microtask(() async {
-      await ref
-          .read(getRequestsStateNotifierProvider.notifier)
-          .getRequests(true);
 
-      await Future.delayed(Duration(milliseconds: 300));
-
-      final requests = ref.read(getRequestsStateNotifierProvider).value ?? [];
-      final finishedWithNoTip =
-          requests.where((r) => r?.estado == 'Finished').toList();
-
-      if (finishedWithNoTip.isNotEmpty) showTipDialog();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      requestPermission(context);
+      initFirebaseTokenBackground();
+      fetchRequestsWithNoTip();
     });
+  }
 
-    Future.delayed(const Duration(seconds: 4), () {
-      sendPlatformAndToken();
-    });
+  Future<void> fetchRequestsWithNoTip() async {
+    userId =
+        ref
+            .read(loginStateNotifierProvider.notifier)
+            .authResponseModel!
+            .result!
+            .userId;
+    await ref
+        .read(getRequestsToTipStateNotifierProvider.notifier)
+        .getRequests(userId!, true);
+
+    if (!mounted) return;
+
+    final requests =
+        ref.read(getRequestsToTipStateNotifierProvider).value ?? [];
+    final shouldPrompt = requests.any((r) => r?.estado == 'Finished');
+
+    if (shouldPrompt) {
+      if (!mounted) return;
+      showTipDialog();
+    }
   }
 
   @override
@@ -206,7 +222,7 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
 
   void showTipDialog() async {
     if (hasShownDialog) return;
-    final finishedRequests = ref.read(getRequestsStateNotifierProvider);
+    final finishedRequests = ref.read(getRequestsToTipStateNotifierProvider);
     finishedRequests.when(
       data: (request) async {
         final toPrompt = request.where((r) => r?.estado == 'Finished').toList();
@@ -235,8 +251,8 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
 
           if (result == true) {
             await ref
-                .read(getRequestsStateNotifierProvider.notifier)
-                .getRequests(true);
+                .read(getRequestsToTipStateNotifierProvider.notifier)
+                .getRequests(userId!, true);
           }
         }
       },
@@ -297,7 +313,17 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
     );
   }
 
-  void sendPlatformAndToken() async {
+  void initFirebaseTokenBackground() {
+    Future.microtask(() async {
+      try {
+        await sendPlatformAndToken();
+      } catch (e) {
+        print("⚠ Error Firebase token: $e");
+      }
+    });
+  }
+
+  Future<void> sendPlatformAndToken() async {
     String? token;
     final messaging = FirebaseMessaging.instance;
     final String platform = Platform.isIOS ? 'apn' : 'fcm';
@@ -315,26 +341,85 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
       token = await messaging.getAPNSToken();
       print('platform es: $platform y token es: $token');
     } else if (Platform.isAndroid) {
-      final settings = await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-      if (settings.authorizationStatus != AuthorizationStatus.authorized) {
-        print("Permiso de notificaciones denegado");
-        return;
-      }
       token = await messaging.getToken();
       print('platform es: $platform y token es: $token');
     }
 
-    await ref
-        .read(registerDeviceTokenStateNotifierProvider.notifier)
-        .registerDeviceToken(platform, token);
+    if (!mounted) return;
 
-    await ref
-        .read(sendPushMessageStateNotifierProvider.notifier)
-        .sendPushMessage();
+    Future.microtask(() async {
+      if (token == null) {
+        print('token null');
+      }
+
+      await ref
+          .read(registerDeviceTokenStateNotifierProvider.notifier)
+          .registerDeviceToken(platform, token);
+
+      await ref
+          .read(sendPushMessageStateNotifierProvider.notifier)
+          .sendPushMessage();
+    });
+  }
+
+  Future<bool> showBackgroundLocationDisclosure(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder:
+              (ctx) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                title: Column(
+                  children: const [
+                    Icon(LucideIcons.mapPin, size: 36),
+                    SizedBox(height: 12),
+                    Text(
+                      "Background Location Permission",
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+                content: const Text(
+                  "We use your location to show addresses and calculate delivery routes. "
+                  "We will only access your location in the background if you grant the permission.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15, height: 1.4),
+                ),
+                actionsAlignment: MainAxisAlignment.center,
+                actions: [
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    icon: const Icon(LucideIcons.xCircle, size: 18),
+                    label: const Text("Decline"),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    icon: const Icon(LucideIcons.checkCircle, size: 18),
+                    label: const Text("Agree"),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
+  }
+
+  Future<void> requestPermission(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    const key = 'background_location_disclosure_seen';
+    final seen = prefs.getBool(key) ?? false;
+
+    if (!seen) {
+      final consent = await showBackgroundLocationDisclosure(context);
+
+      if (!consent) {
+        exit(0);
+      }
+
+      await prefs.setBool(key, true);
+    }
   }
 
   @override
