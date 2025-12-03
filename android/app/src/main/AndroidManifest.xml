@@ -1,9 +1,15 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:label="move"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
+
+        <service
+            android:name="com.example.live_activities.LiveActivityFirebaseMessagingService"
+            tools:node="remove" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
