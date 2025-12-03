@@ -30,17 +30,30 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
       isVerifying = true;
       number = numberController.text.trim();
     });
-    if (number.isEmpty) return;
+    if (number.isEmpty) {
+      setState(() => isVerifying = false);
+      return;
+    }
 
     try {
+      debugPrint('Sending code to: $number');
       await ref.read(sendCodeStateNotifierProvider.notifier).sendCode(number);
-      setState(() => showCodeField = true);
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('An error ocurred')));
+      debugPrint('Code sent successfully');
+      if (mounted) {
+        setState(() => showCodeField = true);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Error sending code: $e');
+      debugPrint('Stack trace: $stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('An error occurred: ${e.toString()}')));
+      }
     } finally {
-      setState(() => isVerifying = false);
+      if (mounted) {
+        setState(() => isVerifying = false);
+      }
     }
   }
 
@@ -49,13 +62,32 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
       isVerifying = true;
       code = codeController.text.trim();
     });
-    if (code.isEmpty) return;
+    if (code.isEmpty) {
+      setState(() => isVerifying = false);
+      return;
+    }
 
     try {
+      debugPrint('Attempting login with number: $number and code: ${code.substring(0, 2)}***');
       await ref.read(loginStateNotifierProvider.notifier).login(number, code);
-    } catch (e) {
+      debugPrint('Login successful');
+    } catch (e, stackTrace) {
+      debugPrint('Error during login: $e');
+      debugPrint('Stack trace: $stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Login failed: ${e.toString()}'),
+          ),
+        );
+      }
     } finally {
-      setState(() => isVerifying = false);
+      if (mounted) {
+        setState(() => isVerifying = false);
+      }
     }
   }
 
@@ -65,15 +97,23 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
       previous,
       next,
     ) {
+      debugPrint('Login state changed: ${next.runtimeType}');
+      if (!mounted) return;
+      
       if (next is AsyncData && next.value != null) {
+        debugPrint('Login successful, navigating to map');
         context.go(MapInputScreen.path);
       }
       if (next is AsyncError) {
+        debugPrint('Login error: ${next.error}');
+        if (mounted) {
+          setState(() => isVerifying = false);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.red,
-            content: const Text(
-              'Incorrect phone number or password. Try again',
+            content: Text(
+              'Incorrect phone number or password. Try again\nError: ${next.error}',
             ),
           ),
         );
