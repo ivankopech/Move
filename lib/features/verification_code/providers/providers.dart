@@ -10,7 +10,7 @@ import '../data/repositories/send_code_repository_interface_implementation.dart'
 final dioProvider = Provider<Dio>((ref) {
   return Dio(
     BaseOptions(
-      baseUrl: 'https://move.softdev.ar/core/api/TokenAuth/SendOtp',
+      baseUrl: 'https://move-d.softdev.ar/core/api/TokenAuth/SendOtp',
       headers: {'Content-Type': 'application/json'},
     ),
   );
@@ -18,8 +18,8 @@ final dioProvider = Provider<Dio>((ref) {
 
 final sendCodeRepositoryInterfaceProvider =
     Provider<SendCodeRepositoryInterface>((ref) {
-      final dio = ref.read(dioProvider);
-      return SendCodeRepositoryInterfaceImplementation(dio);
+      final apiClient = ref.read(apiClientProvider);
+      return SendCodeRepositoryInterfaceImplementation(apiClient);
     });
 
 final sendCodeUseCaseProvider = Provider<SendCodeUseCase>(

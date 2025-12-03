@@ -7,22 +7,25 @@ import '../../domain/repositories/send_code_repository_interface.dart';
 
 class SendCodeRepositoryInterfaceImplementation
     extends SendCodeRepositoryInterface {
-  final Dio dio;
+  final ApiClient apiClient;
 
-  SendCodeRepositoryInterfaceImplementation(this.dio);
+  SendCodeRepositoryInterfaceImplementation(this.apiClient);
 
   @override
   Future<Result<bool?>> sendCode(String number) async {
     try {
       final body = {'phoneNumber': number};
 
-      final response = await dio.post('TokenAuth/SendOtp', data: body);
+      final response = await apiClient.postData(
+        'TokenAuth/SendOtp',
+        body,
+        (json) => SendCodeModel.fromJson(json),
+      );
 
-      if (response.data is bool) {
-        return Right(response.data as bool);
-      } else {
-        return const Left(ApiException.nullValueResponse);
-      }
+      return response.fold(
+        (error) => Left(error),
+        (data) => Right(data?.result),
+      );
     } on DioException catch (e) {
       return Left(
         ApiException(
