@@ -29,9 +29,17 @@ class DeliveryCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: () {
-          Future.microtask(() {
-            context.pushNamed(TrackDeliveryScreen.name, extra: requestModel);
-          });
+          if (requestModel.tracking!.isEmpty) {
+            noDataDialog(
+              context,
+              icon: Icons.info_outline_rounded,
+              text: 'The driver hasn\'t started this delivery yet!',
+            );
+          } else {
+            Future.microtask(() {
+              context.pushNamed(TrackDeliveryScreen.name, extra: requestModel);
+            });
+          }
         },
         child: Row(
           children: [
@@ -52,20 +60,49 @@ class DeliveryCard extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    '${requestModel.calleHasta} ${requestModel.numeroHasta}',
+                  const SizedBox(height: 10),
+                  RichText(
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.black54),
+                    text: TextSpan(
+                      style: const TextStyle(color: Colors.black),
+                      children: [
+                        const TextSpan(
+                          text: 'FROM: ',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text:
+                              '${requestModel.calleDesde} ${requestModel.numeroDesde}, ${requestModel.tramos![0].direccion!.city}',
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 5),
+                  RichText(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      style: const TextStyle(color: Colors.black),
+                      children: [
+                        const TextSpan(
+                          text: 'TO: ',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text:
+                              '${requestModel.calleHasta} ${requestModel.numeroHasta}, ${requestModel.tramos![1].direccion!.city}',
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       const Icon(Icons.circle, size: 10, color: Colors.green),
                       const SizedBox(width: 4),
                       Text(
-                        'On the way',
+                        'Active',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.green.shade700,
@@ -85,4 +122,54 @@ class DeliveryCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void noDataDialog(
+  BuildContext context, {
+  required IconData icon,
+  required String text,
+  String buttonText = 'Go back',
+}) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(icon, size: 60, color: Colors.deepPurpleAccent),
+              const SizedBox(height: 20),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: 200,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurpleAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    buttonText,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
