@@ -151,18 +151,29 @@ void noDataDialog(
               ),
               const SizedBox(height: 20),
               SizedBox(
-                width: 200,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurpleAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                  style: ElevatedButton.styleFrom(padding: EdgeInsets.zero),
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Colors.indigo, Colors.purple],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                  ),
-                  child: Text(
-                    buttonText,
-                    style: TextStyle(color: Colors.white),
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minWidth: 100,
+                        minHeight: 50,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        buttonText,
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
                   ),
                 ),
               ),
