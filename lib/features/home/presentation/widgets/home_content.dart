@@ -241,9 +241,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
 
   List<GetRequestsModel> activeDeliveries(List<GetRequestsModel?> requests) {
     return requests
-        .where(
-          (r) => r?.estado == 'InProgress' && r?.tracking?.isNotEmpty == true,
-        )
+        .where((r) => r?.estado == 'InProgress')
         .map((r) => r!)
         .toList();
   }
