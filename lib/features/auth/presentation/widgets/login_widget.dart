@@ -26,11 +26,20 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
   String code = '';
 
   Future<void> handleRequest() async {
+    number = numberController.text.trim();
+
+    if (number.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Please enter your phone number'),
+        ),
+      );
+      return;
+    }
     setState(() {
       isVerifying = true;
-      number = numberController.text.trim();
     });
-    if (number.isEmpty) return;
 
     try {
       await ref.read(sendCodeStateNotifierProvider.notifier).sendCode(number);
@@ -45,15 +54,31 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
   }
 
   Future<void> handleLogin() async {
+    code = codeController.text.trim();
+
+    if (number.isEmpty || code.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Please enter both your phone number and code'),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       isVerifying = true;
-      code = codeController.text.trim();
     });
-    if (code.isEmpty) return;
 
     try {
       await ref.read(loginStateNotifierProvider.notifier).login(number, code);
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Login failed'),
+        ),
+      );
     } finally {
       setState(() => isVerifying = false);
     }
@@ -72,9 +97,7 @@ class _LoginWidgetState extends ConsumerState<LoginWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.red,
-            content: const Text(
-              'Incorrect phone number or password. Try again',
-            ),
+            content: const Text('Incorrect phone number or code. Try again'),
           ),
         );
         return;
