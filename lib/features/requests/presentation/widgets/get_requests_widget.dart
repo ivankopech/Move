@@ -96,7 +96,7 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
                   child: TabBar(
                     controller: tabController,
                     indicator: BoxDecoration(
-                      color: Colors.indigo,
+                      color: Colors.deepPurpleAccent,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     dividerColor: Colors.transparent,
@@ -119,7 +119,15 @@ class _GetRequestsWidgetState extends ConsumerState<GetRequestsWidget>
               Expanded(
                 child:
                     filteredRequests.isEmpty
-                        ? const Center(child: Text('No requests to show'))
+                        ? const Center(
+                          child: Text(
+                            'No requests to show',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.deepPurpleAccent,
+                            ),
+                          ),
+                        )
                         : ListView.builder(
                           // shrinkWrap: true,
                           // physics: const NeverScrollableScrollPhysics(),
