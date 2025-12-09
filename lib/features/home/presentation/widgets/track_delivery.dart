@@ -57,14 +57,15 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
 
       final p = placemarks.first;
 
-      final street = p.street ?? '';
+      final name = p.street ?? '';
+      final streetName = p.thoroughfare ?? '';
       final number = p.subThoroughfare ?? '';
       final zip = p.postalCode ?? '';
       final city = p.subAdministrativeArea ?? '';
       final state = p.administrativeArea ?? '';
       final country = p.country ?? '';
 
-      return '$street $number, $zip $city, $state, $country'.trim();
+      return '$name, $streetName $number, $zip $city, $state, $country'.trim();
     } catch (e) {
       print('error converting LatLng to address: $e');
       return '';
