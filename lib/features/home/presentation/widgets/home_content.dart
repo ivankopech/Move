@@ -145,17 +145,32 @@ class _HomeContentState extends ConsumerState<HomeContent> {
                 }),
                 const SizedBox(width: 16),
                 buildButton('Submit', () async {
-                  await ref
+                  final result = await ref
                       .read(createProfileStateNotifierProvider.notifier)
                       .createProfile(
                         emailController.text,
                         nameController.text,
                         surnameController.text,
                       );
-                  emailController.clear();
-                  nameController.clear();
-                  surnameController.clear();
-                  context.pop();
+
+                  result.fold(
+                    (failure) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Email address taken. Use a different one',
+                          ),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                      );
+                    },
+                    (success) {
+                      emailController.clear();
+                      nameController.clear();
+                      surnameController.clear();
+                      context.pop();
+                    },
+                  );
                 }),
               ],
             ),
