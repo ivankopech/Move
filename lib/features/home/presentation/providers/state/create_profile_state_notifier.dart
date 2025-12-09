@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:move/config/api_client.dart';
+import 'package:move/config/api_exception.dart';
 import '../../../data/models/create_profile.dart';
 import '../../../domain/use_cases/create_profile_use_case.dart';
 
@@ -11,7 +14,7 @@ class CreateProfileStateNotifier
 
   late CreateProfileModel? createProfileModel;
 
-  Future<void> createProfile(
+  Future<Result<CreateProfileModel?>> createProfile(
     String? emailAddress,
     String? name,
     String? surname,
@@ -27,9 +30,13 @@ class CreateProfileStateNotifier
           return AsyncValue.data(data);
         },
       );
+      return result;
     } catch (error, stackTrace) {
       print("Error fetching data: $error");
       state = AsyncValue.error(error, stackTrace);
+      return Left(
+        error is ApiException ? error : ApiException(message: error.toString()),
+      );
     }
   }
 }
