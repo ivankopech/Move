@@ -18,10 +18,7 @@ class GetRequestsStateNotifier
 
       state = result.fold(
         (error) => AsyncValue.error(error, StackTrace.current),
-        (data) {
-          getRequestsModelList = data;
-          return AsyncValue.data(data);
-        },
+        (data) => AsyncValue.data([...data]),
       );
     } catch (error, stackTrace) {
       print("Error fetching data: $error");
