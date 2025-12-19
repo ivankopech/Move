@@ -14,6 +14,7 @@ import '../../../requests/presentation/screens/get_requests_screen.dart';
 import '../../../map/presentation/screens/map_input.dart';
 import './delivery_card.dart';
 import 'package:flutter/services.dart';
+import 'package:live_activities/live_activities.dart';
 
 class HomeContent extends ConsumerStatefulWidget {
   const HomeContent({super.key});
@@ -31,6 +32,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
     'live_activity_channel',
   );
   late ProviderSubscription<AsyncValue<List<GetRequestsModel?>>> subscription;
+  final liveActivitiesPlugin = LiveActivities();
 
   @override
   void initState() {
@@ -346,8 +348,8 @@ class _HomeContentState extends ConsumerState<HomeContent> {
                           ],
                         ),
                         IconButton(
-                          onPressed: () {
-                            context.pushReplacementNamed(MapInputScreen.name);
+                          onPressed: () async {
+                            //context.pushReplacementNamed(MapInputScreen.name);
                           },
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.deepPurpleAccent,
