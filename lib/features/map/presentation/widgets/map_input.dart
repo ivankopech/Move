@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:live_activities/live_activities.dart';
 import 'dart:io' show Platform, exit;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +26,8 @@ import '../../../home/presentation/providers/device_token_state_notifier_provide
 import '../../../home/presentation/providers/push_message_state_notifier_provider.dart';
 import '../../../auth/presentation/providers/login_state_notifier_provider.dart';
 
+import '../services/live_activity_service.dart';
+
 class MapInputWidget extends ConsumerStatefulWidget {
   const MapInputWidget({super.key});
 
@@ -46,6 +49,8 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
   bool showInputSheet = true;
   bool hasShownDialog = false;
   int? userId;
+  final liveActivityService = LiveActivityService();
+  bool starting = false;
 
   @override
   void initState() {
@@ -475,6 +480,27 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
                           icon: const Icon(Icons.waving_hand_outlined),
                           onPressed: () {
                             Scaffold.of(context).openDrawer();
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    top: 70,
+                    right: 15,
+                    child: Builder(
+                      builder: (context) {
+                        return IconButton(
+                          icon: const Icon(Icons.waving_hand_outlined),
+                          onPressed: () async {
+                            if (starting) return;
+                            starting = true;
+                            await liveActivityService.start(
+                              status: 'En camino 🚚',
+                              //destination: 'zeballos 1212',
+                            );
+                            starting = false;
+                            //Scaffold.of(context).openDrawer();
                           },
                         );
                       },
