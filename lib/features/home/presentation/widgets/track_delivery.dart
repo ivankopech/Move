@@ -29,7 +29,6 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
   Set<Polyline> polylines = {};
   bool isListening = false;
   bool markersLoaded = false;
-  bool polylineLoaded = false;
   late BitmapDescriptor vehicleIcon;
   late BitmapDescriptor destinationIcon;
 
@@ -170,7 +169,6 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
   }
 
   Future<void> loadPolyline() async {
-    if (polylineLoaded) return;
     if (currentPosition == null || destinationMarker == null) {
       print(
         'polyline not ready. current position or destination marker is null',
@@ -179,7 +177,7 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
     }
 
     try {
-      final origin = await buildOrigin(vehicleMarker!.position);
+      final origin = await buildOrigin(currentPosition!);
       final destination = buildDestination();
 
       final polyline = await MapHelper.generatePolyline(
@@ -190,8 +188,8 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
 
       if (polyline.points.isNotEmpty) {
         setState(() {
+          polylines.clear();
           polylines = {polyline};
-          polylineLoaded = true;
         });
       } else {
         print('polyline returned EMPTY!');
