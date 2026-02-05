@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -115,5 +116,32 @@ class MapHelper {
     final uint8List = byteData!.buffer.asUint8List();
 
     return BitmapDescriptor.bytes(uint8List);
+  }
+
+  static double degToRad(double deg) => deg * (math.pi / 180.0);
+
+  static double haversineKm(LatLng a, LatLng b) {
+    const r = 6371.0; // km
+    final dLat = degToRad(b.latitude - a.latitude);
+    final dLng = degToRad(b.longitude - a.longitude);
+
+    final lat1 = degToRad(a.latitude);
+    final lat2 = degToRad(b.latitude);
+
+    final h =
+        math.pow(math.sin(dLat / 2), 2) +
+        math.cos(lat1) * math.cos(lat2) * math.pow(math.sin(dLng / 2), 2);
+
+    final c = 2 * math.atan2(math.sqrt(h), math.sqrt(1 - h));
+    return r * c;
+  }
+
+  static double polylineDistanceKm(List<LatLng> points) {
+    if (points.length < 2) return 0.0;
+    double total = 0.0;
+    for (int i = 0; i < points.length - 1; i++) {
+      total += haversineKm(points[i], points[i + 1]);
+    }
+    return total;
   }
 }
