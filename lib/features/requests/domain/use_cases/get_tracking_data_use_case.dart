@@ -8,7 +8,7 @@ class GetTrackingDataUseCase {
 
   GetTrackingDataUseCase({required this.getTrackingRepositoryInterface});
 
-  Future<Either<ApiException, List<GetTrackingModel?>>> call(int id) async {
+  Future<Either<ApiException, GetTrackingModelResponse>> call(int id) async {
     return getTrackingRepositoryInterface.trackRequest(id: id);
   }
 }

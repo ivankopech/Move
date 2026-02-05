@@ -5,7 +5,7 @@ import 'state/get_tracking_state_notifier.dart';
 
 final getTrackingStateNotifierProvider = StateNotifierProvider<
   GetTrackingStateNotifier,
-  AsyncValue<List<GetTrackingModel?>>
+  AsyncValue<GetTrackingModelResponse>
 >((ref) {
   return GetTrackingStateNotifier(
     getTrackingDataUseCase: ref.read(getTrackingDataUseCaseProvider),

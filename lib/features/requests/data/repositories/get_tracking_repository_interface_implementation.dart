@@ -11,21 +11,22 @@ class GetTrackingRepositoryInterfaceImplementation
   GetTrackingRepositoryInterfaceImplementation(this.apiClient);
 
   @override
-  Future<Result<List<GetTrackingModel?>>> trackRequest({
+  Future<Result<GetTrackingModelResponse>> trackRequest({
     required int id,
   }) async {
     try {
       final response = await apiClient.getData(
-        'services/app/Solicitud/GetTracking/$id?maxResultCount=100',
+        'services/app/Solicitud/GetTracking/$id?maxResultCount=1',
         (json) {
-          final result = GetTrackingModelResponse.fromJson(json);
-          var list = result.items;
-          return list ?? [];
+          final resultJson = json['result'];
+          if (resultJson is! Map<String, dynamic>) {
+            return GetTrackingModelResponse(items: []);
+          }
+          return GetTrackingModelResponse.fromJson(resultJson);
         },
       );
-      return response.fold((error) => Left(error), (data) async {
-        return Right(data!);
-      });
+
+      return response.fold((error) => Left(error), (data) => Right(data!));
     } catch (e, stackTrace) {
       return Left(
         ApiException(

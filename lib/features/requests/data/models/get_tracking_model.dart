@@ -6,11 +6,9 @@ class GetTrackingModelResponse {
 
   GetTrackingModelResponse.fromJson(Map<String, dynamic> json) {
     totalCount = json['totalCount'];
-    var result = json['result'];
-    var datos = result['items'];
-    if (datos != null) {
+    if (json['items'] != null) {
       items = <GetTrackingModel>[];
-      datos.forEach((v) {
+      json['items'].forEach((v) {
         items!.add(GetTrackingModel.fromJson(v));
       });
     }
