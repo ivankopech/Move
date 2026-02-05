@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
@@ -28,18 +29,13 @@ class _HomeContentState extends ConsumerState<HomeContent> {
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController surnameController = TextEditingController();
-  static const MethodChannel activityChannel = MethodChannel(
-    'live_activity_channel',
-  );
-  late ProviderSubscription<AsyncValue<List<GetRequestsModel?>>> subscription;
-  final liveActivitiesPlugin = LiveActivities();
+  // late ProviderSubscription<AsyncValue<List<GetRequestsModel?>>> subscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       loadData();
-      liveActivity();
     });
   }
 
@@ -66,33 +62,6 @@ class _HomeContentState extends ConsumerState<HomeContent> {
           .read(getRequestsStateNotifierProvider.notifier)
           .getRequests(userId!, false);
     }
-  }
-
-  void liveActivity() {
-    subscription = ref.listenManual(getRequestsStateNotifierProvider, (
-      previous,
-      next,
-    ) async {
-      if (!Platform.isIOS) return;
-
-      final requests = next.value ?? [];
-
-      final inProgress =
-          requests
-              .where(
-                (r) => r?.estado == 'InProgress' && r!.tracking!.isNotEmpty,
-              )
-              .toList();
-
-      if (inProgress.isNotEmpty) {
-        final req = inProgress.first!;
-        final destinationAddress =
-            '${req.calleHasta ?? ''} ${req.numeroHasta ?? ''}';
-        await startLiveActivity(id: req.id!, destination: destinationAddress);
-      } else {
-        await stopLiveActivity();
-      }
-    });
   }
 
   Widget showInputDialog() {
@@ -157,14 +126,45 @@ class _HomeContentState extends ConsumerState<HomeContent> {
 
                   result.fold(
                     (failure) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Email address taken. Use a different one',
-                          ),
-                          backgroundColor: Colors.redAccent,
-                        ),
-                      );
+                      if (Platform.isAndroid) {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('An error ocurred'),
+                              content: Text(
+                                'Email address taken. Use another one',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text('Cancel'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                      if (Platform.isIOS) {
+                        showCupertinoDialog(
+                          context: context,
+                          builder: (context) {
+                            return CupertinoAlertDialog(
+                              title: const Text('An error ocurred'),
+                              content: const Text(
+                                'Email address taken. Use another one',
+                              ),
+                              actions: [
+                                CupertinoDialogAction(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text('Cancel'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     },
                     (success) {
                       emailController.clear();
@@ -228,30 +228,6 @@ class _HomeContentState extends ConsumerState<HomeContent> {
     );
   }
 
-  Future<void> startLiveActivity({
-    required int id,
-    required String destination,
-  }) async {
-    if (!Platform.isIOS) return;
-    try {
-      await activityChannel.invokeMethod('startActivity', {
-        'id': id,
-        'destination': destination,
-      });
-    } catch (e) {
-      debugPrint("Error starting activity: $e");
-    }
-  }
-
-  Future<void> stopLiveActivity() async {
-    if (!Platform.isIOS) return;
-    try {
-      await activityChannel.invokeMethod('stopActivity');
-    } catch (e) {
-      debugPrint("Error stopping activity: $e");
-    }
-  }
-
   int countByStatus(List<GetRequestsModel?> requests, String status) {
     return requests.where((r) => r?.estado == status).length;
   }
@@ -265,7 +241,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
 
   @override
   void dispose() {
-    subscription.close();
+    //subscription.close();
     emailController.dispose();
     nameController.dispose();
     surnameController.dispose();
@@ -349,7 +325,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
                         ),
                         IconButton(
                           onPressed: () async {
-                            //context.pushReplacementNamed(MapInputScreen.name);
+                            context.pushReplacementNamed(MapInputScreen.name);
                           },
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.deepPurpleAccent,
@@ -412,6 +388,7 @@ class _HomeContentState extends ConsumerState<HomeContent> {
                                 child: Center(
                                   child: Text(
                                     'You currently have no active deliveries...',
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
