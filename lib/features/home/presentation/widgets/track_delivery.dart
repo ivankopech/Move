@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:move/features/home/presentation/providers/providers.dart';
 import 'package:move/features/map/presentation/services/live_activity_service.dart';
+import 'package:move/features/requests/data/models/get_tracking_model.dart';
 import '../../../requests/data/models/get_requests_model.dart';
 import '../../../requests/presentation/providers/get_tracking_state_notifier_provider.dart';
 import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
@@ -42,6 +45,8 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
   String? lastStatus;
   DateTime lastLiveUpdate = DateTime.fromMillisecondsSinceEpoch(0);
   double? lastSentKm;
+  ProviderSubscription<AsyncValue<GetTrackingModelResponse>>? trackingSub;
+  ProviderSubscription<AsyncValue<List<GetRequestsModel?>>>? requestsSub;
 
   @override
   void initState() {
@@ -49,15 +54,17 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
     Future.delayed(Duration.zero, () async {
       await loadIcons();
       await loadDestinationPosition();
+      if (!mounted) return;
       ref
           .read(getTrackingStateNotifierProvider.notifier)
           .trackRequest(widget.requestsModel.id!);
-      ref
-          .read(getRequestsStateNotifierProvider.notifier)
-          .getRequests(widget.requestsModel.id!, false);
+      // ref
+      //     .read(getRequestsStateNotifierProvider.notifier)
+      //     .getRequests(widget.requestsModel.id!, false);
       startPolling();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       await startLiveActivity();
     });
     distanceSub = ref.listenManual(distanceDeliveryProvider, (
@@ -86,6 +93,70 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
         distance: next,
         destination: destination,
       );
+    });
+
+    trackingSub = ref.listenManual(getTrackingStateNotifierProvider, (
+      prev,
+      next,
+    ) {
+      next.whenData((res) async {
+        if (!mounted) return;
+
+        final trackingData = res.items ?? [];
+        if (trackingData.isEmpty) return;
+
+        final latest = trackingData.first;
+        final lat = latest.latitude;
+        final lng = latest.longitude;
+        if (lat == null || lng == null) return;
+
+        final newPosition = LatLng(lat, lng);
+
+        if (currentPosition == null) {
+          if (!mounted) return;
+          setState(() {
+            currentPosition = newPosition;
+            vehicleMarker = buildMarker(
+              id: 'vehicle',
+              position: newPosition,
+              icon: vehicleIcon,
+            );
+          });
+          moveCamera(newPosition);
+        } else if (currentPosition != newPosition) {
+          animateMarker(newPosition);
+        }
+
+        // Ojo: esto hace requests, puede tardar → re-chequeá mounted
+        await loadPolyline();
+      });
+    });
+
+    requestsSub = ref.listenManual(getRequestsStateNotifierProvider, (
+      prev,
+      next,
+    ) {
+      next.whenData((res) async {
+        if (!mounted) return;
+        if (res.isEmpty) return;
+
+        final status = res.first?.estado;
+        if (status == null) return;
+
+        if (status != lastStatus) {
+          lastStatus = status;
+
+          if (isFinishedStatus(status) && liveStarted && !endingLive) {
+            endingLive = true;
+            try {
+              await liveActivityService.end();
+              liveStarted = false;
+            } finally {
+              endingLive = false;
+            }
+          }
+        }
+      });
     });
   }
 
@@ -140,10 +211,12 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
         position: latLng,
         icon: destinationIcon,
       );
+      if (!mounted) return;
       setState(() {});
     } catch (e) {
       print("Error obtaining destination: $e");
     }
+    if (!mounted) return;
     loadPolyline();
   }
 
@@ -165,6 +238,7 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
 
   void startPolling() {
     pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
       ref
           .read(getTrackingStateNotifierProvider.notifier)
           .trackRequest(widget.requestsModel.id!);
@@ -226,6 +300,8 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
         destination: destination,
         apiKey: dotenv.env['API_KEY']!,
       );
+
+      if (!mounted) return;
 
       if (polyline.points.isNotEmpty) {
         setState(() {
@@ -312,24 +388,26 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
   }
 
   Future<void> startLiveActivity() async {
-    if (liveStarted || startingLive) return;
+    if (Platform.isIOS) {
+      if (liveStarted || startingLive) return;
 
-    startingLive = true;
-    String street = widget.requestsModel.calleHasta!;
-    String number = widget.requestsModel.numeroHasta!;
-    String destination = '$street $number'.trim();
-    try {
-      final km = ref.read(distanceDeliveryProvider) ?? 0.0;
+      startingLive = true;
+      String street = widget.requestsModel.calleHasta!;
+      String number = widget.requestsModel.numeroHasta!;
+      String destination = '$street $number'.trim();
+      try {
+        final km = ref.read(distanceDeliveryProvider) ?? 0.0;
 
-      await liveActivityService.start(
-        status: 'On the way',
-        distance: km,
-        destination: destination,
-      );
+        await liveActivityService.start(
+          status: 'On the way',
+          distance: km,
+          destination: destination,
+        );
 
-      liveStarted = true;
-    } finally {
-      startingLive = false;
+        liveStarted = true;
+      } finally {
+        startingLive = false;
+      }
     }
   }
 
@@ -340,91 +418,19 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
 
   @override
   void dispose() {
-    distanceSub?.close();
     pollingTimer?.cancel();
+
+    distanceSub?.close();
+    requestsSub?.close();
+    trackingSub?.close();
+
     mapController?.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('entro al build');
-    ref.listen(getTrackingStateNotifierProvider, (prev, next) {
-      next.whenData((res) async {
-        if (res.items!.isEmpty) return;
-        final trackingData = res.items ?? [];
-        if (trackingData.isNotEmpty) {
-          final latest = trackingData.first;
-          final lat = latest.latitude;
-          final lng = latest.longitude;
-          //final status = (widget.requestsModel.estado);
-
-          // if (status!.isNotEmpty && status != lastStatus) {
-          //   lastStatus = status;
-
-          //   if (isFinishedStatus(status) && liveStarted && !endingLive) {
-          //     endingLive = true;
-          //     try {
-          //       await liveActivityService.end();
-          //       liveStarted = false;
-          //     } finally {
-          //       endingLive = false;
-          //     }
-          //   }
-          // }
-
-          if (lat == null || lng == null) return;
-
-          final newPosition = LatLng(lat, lng);
-
-          if (!markersLoaded) {
-            loadMarkers();
-            markersLoaded = true;
-            setState(() {});
-          }
-
-          if (currentPosition == null) {
-            setState(() {
-              currentPosition = newPosition;
-
-              vehicleMarker = buildMarker(
-                id: 'vehicle',
-                position: newPosition,
-                icon: vehicleIcon,
-              );
-            });
-            moveCamera(newPosition);
-          } else if (currentPosition != newPosition) {
-            animateMarker(newPosition);
-          }
-          loadPolyline();
-        }
-      });
-    });
-
-    ref.listen(getRequestsStateNotifierProvider, (prev, next) {
-      next.whenData((res) async {
-        if (res.first!.estado == null) return;
-
-        final status = res.first!.estado;
-        if (status == null) return;
-
-        if (status != lastStatus) {
-          lastStatus = status;
-
-          if (isFinishedStatus(status) && liveStarted && !endingLive) {
-            endingLive = true;
-            try {
-              await liveActivityService.end();
-              liveStarted = false;
-            } finally {
-              endingLive = false;
-            }
-          }
-        }
-      });
-    });
-
     return Scaffold(
       appBar: AppBar(backgroundColor: Colors.white),
       body:
