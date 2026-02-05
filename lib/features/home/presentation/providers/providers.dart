@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:move/config/api_client.dart';
 import 'package:move/features/home/data/repositories/push_message_repository_interface_implementation.dart';
@@ -74,3 +75,6 @@ final sendPushMessageUseCaseProvider = Provider<SendPushMessageUseCase>(
     ),
   ),
 );
+
+//PROVIDERS
+final distanceDeliveryProvider = StateProvider<double?>((ref) => null);
