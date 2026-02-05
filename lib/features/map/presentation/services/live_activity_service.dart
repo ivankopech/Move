@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:live_activities/live_activities.dart';
 import 'package:flutter/foundation.dart';
 
@@ -7,9 +9,11 @@ class LiveActivityService {
   bool initialized = false;
 
   Future<void> init() async {
-    if (initialized) return;
-    await plugin.init(appGroupId: 'group.com.softing.move');
-    initialized = true;
+    if (Platform.isIOS) {
+      if (initialized) return;
+      await plugin.init(appGroupId: 'group.com.softing.move');
+      initialized = true;
+    }
   }
 
   Future<void> start({
