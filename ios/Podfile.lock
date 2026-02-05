@@ -116,7 +116,6 @@ DEPENDENCIES:
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
-  - GooglePlaces
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - live_activities (from `.symlinks/plugins/live_activities/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -203,6 +202,6 @@ SPEC CHECKSUMS:
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
 
-PODFILE CHECKSUM: 1408df9bb19eba60583d900e0fbe660397a255d6
+PODFILE CHECKSUM: f3183e344f38e7e8fbd18ec32021462f9094bdbd
 
 COCOAPODS: 1.16.2
