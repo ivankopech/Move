@@ -5,8 +5,11 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:move/features/home/presentation/providers/providers.dart';
+import 'package:move/features/map/presentation/services/live_activity_service.dart';
 import '../../../requests/data/models/get_requests_model.dart';
 import '../../../requests/presentation/providers/get_tracking_state_notifier_provider.dart';
+import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
 import '../../../map/presentation/widgets/map_helper.dart';
 
 class TrackDelivery extends ConsumerStatefulWidget {
@@ -31,6 +34,14 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
   bool markersLoaded = false;
   late BitmapDescriptor vehicleIcon;
   late BitmapDescriptor destinationIcon;
+  final liveActivityService = LiveActivityService();
+  ProviderSubscription<double?>? distanceSub;
+  bool startingLive = false;
+  bool liveStarted = false;
+  bool endingLive = false;
+  String? lastStatus;
+  DateTime lastLiveUpdate = DateTime.fromMillisecondsSinceEpoch(0);
+  double? lastSentKm;
 
   @override
   void initState() {
@@ -41,7 +52,40 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
       ref
           .read(getTrackingStateNotifierProvider.notifier)
           .trackRequest(widget.requestsModel.id!);
+      ref
+          .read(getRequestsStateNotifierProvider.notifier)
+          .getRequests(widget.requestsModel.id!, false);
       startPolling();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await startLiveActivity();
+    });
+    distanceSub = ref.listenManual(distanceDeliveryProvider, (
+      prev,
+      next,
+    ) async {
+      if (!liveStarted) return;
+      if (next == null) return;
+
+      final now = DateTime.now();
+      final tooSoon = now.difference(lastLiveUpdate).inSeconds < 3;
+      final tooSmallChange =
+          lastSentKm != null && (next - lastSentKm!).abs() < 0.1;
+
+      if (tooSoon || tooSmallChange) return;
+
+      lastLiveUpdate = now;
+      lastSentKm = next;
+
+      String street = widget.requestsModel.calleHasta!;
+      String number = widget.requestsModel.numeroHasta!;
+      String destination = '$street $number';
+
+      await liveActivityService.update(
+        status: 'On the way',
+        distance: next,
+        destination: destination,
+      );
     });
   }
 
@@ -170,9 +214,6 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
 
   Future<void> loadPolyline() async {
     if (currentPosition == null || destinationMarker == null) {
-      print(
-        'polyline not ready. current position or destination marker is null',
-      );
       return;
     }
 
@@ -191,6 +232,7 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
           polylines.clear();
           polylines = {polyline};
         });
+        updateDistanceFromPolylines();
       } else {
         print('polyline returned EMPTY!');
       }
@@ -259,8 +301,46 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
     );
   }
 
+  void updateDistanceFromPolylines() {
+    if (polylines.isEmpty) return;
+
+    final route = polylines.first;
+    final kmRaw = MapHelper.polylineDistanceKm(route.points);
+    final kmRounded = double.parse(kmRaw.toStringAsFixed(1));
+
+    ref.read(distanceDeliveryProvider.notifier).state = kmRounded;
+  }
+
+  Future<void> startLiveActivity() async {
+    if (liveStarted || startingLive) return;
+
+    startingLive = true;
+    String street = widget.requestsModel.calleHasta!;
+    String number = widget.requestsModel.numeroHasta!;
+    String destination = '$street $number'.trim();
+    try {
+      final km = ref.read(distanceDeliveryProvider) ?? 0.0;
+
+      await liveActivityService.start(
+        status: 'On the way',
+        distance: km,
+        destination: destination,
+      );
+
+      liveStarted = true;
+    } finally {
+      startingLive = false;
+    }
+  }
+
+  bool isFinishedStatus(String status) {
+    final s = status.toLowerCase();
+    return s == 'finished' || s == 'delivered' || s == 'cancelled';
+  }
+
   @override
   void dispose() {
+    distanceSub?.close();
     pollingTimer?.cancel();
     mapController?.dispose();
     super.dispose();
@@ -268,12 +348,33 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
 
   @override
   Widget build(BuildContext context) {
+    print('entro al build');
     ref.listen(getTrackingStateNotifierProvider, (prev, next) {
-      next.whenData((trackingData) {
+      next.whenData((res) async {
+        if (res.items!.isEmpty) return;
+        final trackingData = res.items ?? [];
         if (trackingData.isNotEmpty) {
           final latest = trackingData.first;
-          final lat = (latest?.latitude ?? 0).toDouble();
-          final lng = (latest?.longitude ?? 0).toDouble();
+          final lat = latest.latitude;
+          final lng = latest.longitude;
+          //final status = (widget.requestsModel.estado);
+
+          // if (status!.isNotEmpty && status != lastStatus) {
+          //   lastStatus = status;
+
+          //   if (isFinishedStatus(status) && liveStarted && !endingLive) {
+          //     endingLive = true;
+          //     try {
+          //       await liveActivityService.end();
+          //       liveStarted = false;
+          //     } finally {
+          //       endingLive = false;
+          //     }
+          //   }
+          // }
+
+          if (lat == null || lng == null) return;
+
           final newPosition = LatLng(lat, lng);
 
           if (!markersLoaded) {
@@ -297,6 +398,29 @@ class _TrackDeliveryState extends ConsumerState<TrackDelivery> {
             animateMarker(newPosition);
           }
           loadPolyline();
+        }
+      });
+    });
+
+    ref.listen(getRequestsStateNotifierProvider, (prev, next) {
+      next.whenData((res) async {
+        if (res.first!.estado == null) return;
+
+        final status = res.first!.estado;
+        if (status == null) return;
+
+        if (status != lastStatus) {
+          lastStatus = status;
+
+          if (isFinishedStatus(status) && liveStarted && !endingLive) {
+            endingLive = true;
+            try {
+              await liveActivityService.end();
+              liveStarted = false;
+            } finally {
+              endingLive = false;
+            }
+          }
         }
       });
     });

@@ -29,17 +29,9 @@ class DeliveryCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
         onTap: () {
-          if (requestModel.tracking!.isEmpty) {
-            noDataDialog(
-              context,
-              icon: Icons.info_outline_rounded,
-              text: 'The driver hasn\'t started this delivery yet!',
-            );
-          } else {
-            Future.microtask(() {
-              context.pushNamed(TrackDeliveryScreen.name, extra: requestModel);
-            });
-          }
+          Future.microtask(() {
+            context.pushNamed(TrackDeliveryScreen.name, extra: requestModel);
+          });
         },
         child: Row(
           children: [

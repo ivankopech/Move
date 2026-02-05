@@ -3,10 +3,10 @@ import 'package:flutter/foundation.dart';
 
 class LiveActivityService {
   final LiveActivities plugin = LiveActivities();
-  String? activityKey;
+  String? systemActivityId;
   bool initialized = false;
 
-  Future<void> _init() async {
+  Future<void> init() async {
     if (initialized) return;
     await plugin.init(appGroupId: 'group.com.softing.move');
     initialized = true;
@@ -14,44 +14,57 @@ class LiveActivityService {
 
   Future<void> start({
     required String status,
-    //required String destination,
+    required double distance,
+    required String destination,
   }) async {
-    await _init();
+    await init();
 
-    if (activityKey != null) {
-      await update(status: status);
+    if (systemActivityId != null) {
+      await update(
+        status: status,
+        distance: distance,
+        destination: destination,
+      );
       return;
     }
 
-    final key = 'delivery_${DateTime.now().millisecondsSinceEpoch}';
+    final customId = 'delivery_${DateTime.now().millisecondsSinceEpoch}';
 
-    await plugin.createActivity(key, {
+    final createdId = await plugin.createActivity(customId, {
       'status': status,
-      //'destination': destination,
+      'distance': distance,
+      'destination': destination,
     });
 
-    activityKey = key;
+    systemActivityId = createdId?.toString();
+    if (systemActivityId == null || systemActivityId!.isEmpty) {
+      debugPrint('create activity returned null/empty id');
+      return;
+    }
+    debugPrint('system id: $systemActivityId');
   }
 
   Future<void> update({
     required String status,
-    //required String destination,
+    required double distance,
+    required String destination,
   }) async {
-    await _init();
-    if (activityKey == null) return;
+    await init();
+    if (systemActivityId == null) return;
 
-    await plugin.updateActivity(activityKey!, {
+    await plugin.updateActivity(systemActivityId!, {
       'status': status,
-      //'destination': destination,
+      'distance': distance,
+      'destination': destination,
     });
   }
 
   Future<void> end() async {
-    await _init();
+    await init();
 
-    if (activityKey == null) return;
+    if (systemActivityId == null) return;
 
-    await plugin.endActivity(activityKey!);
-    activityKey = null;
+    await plugin.endActivity(systemActivityId!);
+    systemActivityId = null;
   }
 }
