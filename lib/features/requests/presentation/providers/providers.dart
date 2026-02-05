@@ -9,6 +9,9 @@ import '../../domain/use_cases/get_requests_data_use_case.dart';
 import '../../data/repositories/get_tracking_repository_interface_implementation.dart';
 import '../../domain/repositories/get_tracking_repository_interface.dart';
 import '../../domain/use_cases/get_tracking_data_use_case.dart';
+import '../../data/repositories/get_request_id_repository_interface_implementation.dart';
+import '../../domain/repositories/get_request_id_repository_interface.dart';
+import '../../domain/use_cases/get_request_id_data_use_case.dart';
 
 final getRequestsRepositoryInterfaceProvider =
     Provider<GetRequestsRepositoryInterface>((ref) {
@@ -46,11 +49,26 @@ final getTrackingRepositoryInterfaceProvider =
       return GetTrackingRepositoryInterfaceImplementation(apiClient);
     });
 
-//USE CASE PROVIDER
 final getTrackingDataUseCaseProvider = Provider<GetTrackingDataUseCase>(
   (ref) => GetTrackingDataUseCase(
     getTrackingRepositoryInterface: ref.watch(
       getTrackingRepositoryInterfaceProvider,
+    ),
+  ),
+);
+
+//GET REQUEST BY ID
+final getRequestByIdRepositoryInterfaceProvider =
+    Provider<GetRequestByIdRepositoryInterface>((ref) {
+      final apiClient = ref.read(apiClientProvider);
+      return GetRequestByIdRepositoryInterfaceImplementation(apiClient);
+    });
+
+//USE CASE PROVIDER
+final getRequestByIdDataUseCaseProvider = Provider<GetRequestByIdDataUseCase>(
+  (ref) => GetRequestByIdDataUseCase(
+    getRequestByIdRepositoryInterface: ref.watch(
+      getRequestByIdRepositoryInterfaceProvider,
     ),
   ),
 );
