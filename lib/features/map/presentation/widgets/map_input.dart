@@ -19,14 +19,13 @@ import '../../../home/presentation/widgets/app_drawer.dart';
 import './input_address_sheet.dart';
 import '../widgets/map_helper.dart';
 import './arrival_time.dart';
-import './tip_dialog.dart';
+import 'tip_dialog.dart';
 
 import '../../../requests/presentation/providers/get_requests_state_notifier_provider.dart';
 import '../../../home/presentation/providers/device_token_state_notifier_provider.dart';
 import '../../../home/presentation/providers/push_message_state_notifier_provider.dart';
 import '../../../auth/presentation/providers/login_state_notifier_provider.dart';
-
-import '../services/live_activity_service.dart';
+import '../../../requests/presentation/providers/get_request_id_state_notifier_provider.dart';
 
 class MapInputWidget extends ConsumerStatefulWidget {
   const MapInputWidget({super.key});
@@ -49,7 +48,6 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
   bool showInputSheet = true;
   bool hasShownDialog = false;
   int? userId;
-  final liveActivityService = LiveActivityService();
   bool starting = false;
 
   @override
@@ -227,43 +225,39 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
 
   void showTipDialog() async {
     if (hasShownDialog) return;
-    final finishedRequests = ref.read(getRequestsToTipStateNotifierProvider);
-    finishedRequests.when(
-      data: (request) async {
-        final toPrompt = request.where((r) => r?.estado == 'Finished').toList();
+    final asyncRequests = ref.read(getRequestsToTipStateNotifierProvider);
+    final list = asyncRequests.value;
 
-        if (toPrompt.isEmpty) return;
+    if (list == null) return;
 
-        hasShownDialog = true;
+    final toPrompt = list.where((r) => r?.estado == 'Finished').toList();
+    if (toPrompt.isEmpty) return;
 
-        for (final request in toPrompt) {
-          if (request == null) continue;
+    hasShownDialog = true;
 
-          final from = '${request.calleDesde} ${request.numeroDesde}';
-          final to = '${request.calleHasta} ${request.numeroHasta}';
+    for (final req in toPrompt) {
+      if (req == null || req.id == null) continue;
 
-          final result = await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder:
-                (_) => TipDialog(
-                  id: request.id,
-                  from: from,
-                  to: to,
-                  date: request.fechaViaje,
-                ),
-          );
+      await ref
+          .read(getRequestByIdStateNotifierProvider.notifier)
+          .getRequestById(req.id!);
 
-          if (result == true) {
-            await ref
-                .read(getRequestsToTipStateNotifierProvider.notifier)
-                .getRequests(userId!, true);
-          }
-        }
-      },
-      loading: () => LoaderWidget(),
-      error: (e, _) => print('Error: $e'),
-    );
+      if (!mounted) return;
+
+      final from = '${req.calleDesde} ${req.numeroDesde}';
+      final to = '${req.calleHasta} ${req.numeroHasta}';
+
+      final result = await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => TipDialog(id: req.id!, from: from, to: to),
+      );
+      if (result == true) {
+        await ref
+            .read(getRequestsToTipStateNotifierProvider.notifier)
+            .getRequests(userId!, true);
+      }
+    }
   }
 
   void showLocationDialog({
@@ -485,27 +479,7 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
                       },
                     ),
                   ),
-                  Positioned(
-                    top: 70,
-                    right: 15,
-                    child: Builder(
-                      builder: (context) {
-                        return IconButton(
-                          icon: const Icon(Icons.waving_hand_outlined),
-                          onPressed: () async {
-                            if (starting) return;
-                            starting = true;
-                            await liveActivityService.start(
-                              status: 'En camino 🚚',
-                              //destination: 'zeballos 1212',
-                            );
-                            starting = false;
-                            //Scaffold.of(context).openDrawer();
-                          },
-                        );
-                      },
-                    ),
-                  ),
+
                   showInputSheet
                       ? InputAddressSheet(
                         originAddressController: originAddressController,
