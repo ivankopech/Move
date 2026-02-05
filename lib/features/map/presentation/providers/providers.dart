@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:move/config/api_client_provider.dart';
-import 'package:move/features/map/data/models/create_request.dart';
 import 'package:move/features/map/data/repositories/repositories.dart';
 import 'package:move/features/map/domain/repositories/repositories.dart';
 import 'package:move/features/map/domain/repositories/vehicle_type_repository_interface.dart';
@@ -10,10 +9,13 @@ import 'package:move/features/map/presentation/providers/state/images_notifier.d
 import '../../data/repositories/create_request_repository_interface_implementation.dart';
 import '../../domain/repositories/create_request_repository_interface.dart';
 import '../../domain/use_cases/create_request_use_case.dart';
+import '../../data/repositories/create_review_repository_interface_implementation.dart';
+import '../../domain/repositories/create_review_repository_interface.dart';
+import '../../domain/use_cases/create_review_use_case.dart';
 import '../../data/repositories/vehicle_type_repository_interface_implementation.dart';
-import '../../domain/repositories/vehicle_type_repository_interface.dart';
 import '../../domain/use_cases/vehicle_type_use_case.dart';
 import '../../data/models/request_info.dart';
+import '';
 
 // REPOSITORY PROVIDERS
 final sampleRepositoryInterfaceProvider = Provider<SampleRepositoryInterface>((
@@ -42,6 +44,23 @@ final createRequestUseCaseProvider = Provider<CreateRequestUseCase>(
   (ref) => CreateRequestUseCase(
     createRequestRepositoryInterface: ref.watch(
       createRequestRepositoryInterfaceProvider,
+    ),
+  ),
+);
+
+//CREATE REVIEW
+
+final createReviewRepositoryInterfaceProvider =
+    Provider<CreateReviewRepositoryInterface>((ref) {
+      final apiClient = ref.read(apiClientProvider);
+      return CreateReviewRepositoryInterfaceImplementation(apiClient);
+    });
+
+// USE CASE PROVIDERS
+final createReviewUseCaseProvider = Provider<CreateReviewUseCase>(
+  (ref) => CreateReviewUseCase(
+    createReviewRepositoryInterface: ref.watch(
+      createReviewRepositoryInterfaceProvider,
     ),
   ),
 );
