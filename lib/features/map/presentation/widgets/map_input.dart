@@ -1,9 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:live_activities/live_activities.dart';
-import 'dart:io' show Platform, exit;
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'dart:io' show Platform;
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
@@ -57,7 +56,6 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
     loadEnv();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      requestPermission(context);
       initFirebaseTokenBackground();
       fetchRequestsWithNoTip();
     });
@@ -359,66 +357,6 @@ class _MapInputWidgetState extends ConsumerState<MapInputWidget> {
           .read(sendPushMessageStateNotifierProvider.notifier)
           .sendPushMessage();
     });
-  }
-
-  Future<bool> showBackgroundLocationDisclosure(BuildContext context) async {
-    return await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder:
-              (ctx) => AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                title: Column(
-                  children: const [
-                    Icon(LucideIcons.mapPin, size: 36),
-                    SizedBox(height: 12),
-                    Text(
-                      "Background Location Permission",
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-                content: const Text(
-                  "We use your location to show addresses and calculate delivery routes. "
-                  "We will only access your location in the background if you grant the permission.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, height: 1.4),
-                ),
-                actionsAlignment: MainAxisAlignment.center,
-                actions: [
-                  ElevatedButton.icon(
-                    onPressed: () => Navigator.of(ctx).pop(false),
-                    icon: const Icon(LucideIcons.xCircle, size: 18),
-                    label: const Text("Decline"),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    onPressed: () => Navigator.of(ctx).pop(true),
-                    icon: const Icon(LucideIcons.checkCircle, size: 18),
-                    label: const Text("Agree"),
-                  ),
-                ],
-              ),
-        ) ??
-        false;
-  }
-
-  Future<void> requestPermission(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    const key = 'background_location_disclosure_seen';
-    final seen = prefs.getBool(key) ?? false;
-
-    if (!seen) {
-      final consent = await showBackgroundLocationDisclosure(context);
-
-      if (!consent) {
-        exit(0);
-      }
-
-      await prefs.setBool(key, true);
-    }
   }
 
   @override
